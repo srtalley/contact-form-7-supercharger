@@ -1,0 +1,97 @@
+{ "plugin_settings":{
+    "plugin_domain":"ds_ewpcf7",
+    "tabs":"true",
+    "options_suffix":"_options",
+    "page_suffix":"_page",
+    "author":"Dusty Sun",
+    "author_uri":"https://dustysun.com",
+    "plugin_name":"Contact Form 7 SUPERCHARGER",
+    "plugin_uri":"https://dustysun.com/contact-form-7-supercharger/",
+    "support_uri":"https://dustysun.com/wordpress-plugin-theme-support/",
+    "support_email":"support@dustysun.com",
+    "page_slug":"contact-form-7-supercharger",
+    "plugin_slug":"contact-form-7-supercharger",
+    "page_hook":"contact_page_contact-form-7-supercharger",
+    "version":"1.3",
+    "wpla_update_url":"https://dustysun.com"
+  },
+  "about_sections":{
+    "ds_ewpcf7_help":{
+      "title":"How to Use This Plugin",
+      "tab_label":"Help"
+    },
+    "ds_ewpcf7_main_about":{
+      "title":"About This Plugin",
+      "tab_label":"About"
+    }
+  },
+  "options":{
+    "ds_ewpcf7_form_style":{
+      "title":"Main Settings",
+      "tab_label":"General",
+        "fields":[{
+            "id":"hover_label_bg_color",
+            "label":"Hover Label Background Color:",
+            "type":"color_picker",
+            "value":"#000"
+          },{
+            "id":"hover_label_text_color",
+            "label":"Hover Label Text Color:",
+            "type":"color_picker",
+            "value":"#FFF"
+          },{
+            "id":"error_icon",
+            "label":"Error message icon:",
+            "type":"fontawesome_picker",
+            "value":"fas fa-info-circle"
+            },{
+              "id":"success_icon",
+              "label":"Success message icon:",
+              "type":"fontawesome_picker",
+              "value":"fas fa-check-circle"
+            },{
+              "id":"submit_button_type",
+              "label":"Change default submit button style:",
+              "type":"radio_on_off",
+              "options":{
+                "default":"Input",
+                "button":"Button"
+                },
+              "value":"button"
+            },{
+              "id":"form_style",
+              "label":"Use CSS for form:",
+              "type":"radio_on_off",
+              "options":{
+                "yes":"Custom",
+                "no":"Theme Default"
+                },
+              "value":"yes"
+            },{
+              "id":"lightbox_enabled",
+              "label":"Use lightbox for notifications:",
+              "type":"radio_on_off",
+              "options":{
+                "yes":"Yes",
+                "no":"No"
+                },
+              "value":"yes"
+          }]
+    },
+    "ds_ewpcf7_utm_tracking":{
+      "title":"Google UTM Tracking",
+      "tab_label":"UTM Tracking",
+      "info":"You can selectively track UTM values on any form by adding the code <strong>[utm]</strong>, but you can also turn on UTM tracking for every single form here.",
+        "fields":[{
+          "id":"utm_all_forms",
+          "label":"Turn on UTM tracking for all forms:",
+          "type":"radio_on_off",
+          "options":{
+            "yes":"Yes",
+            "no":"No"
+            },
+          "value":"no"
+          }]
+      }
+  }
+}

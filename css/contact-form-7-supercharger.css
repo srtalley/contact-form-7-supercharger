@@ -1,0 +1,175 @@
+/* 1.0.2.1 */
+
+/* hide placeholders when clicking in box */
+form.wpcf7-form.ds-ewpcf7 input:focus::-webkit-input-placeholder { color:transparent; }
+form.wpcf7-form.ds-ewpcf7 input:focus:-moz-placeholder { color:transparent; }
+form.wpcf7-form.ds-ewpcf7 textarea:focus::-webkit-input-placeholder { color:transparent; }
+form.wpcf7-form.ds-ewpcf7 textarea:focus:-moz-placeholder { color:transparent; }
+
+form.wpcf7-form.ds-ewpcf7 {
+  font-family: inherit;
+}
+/* Hover labels*/
+.ds-hover-label {
+  display: block;
+  position: relative;
+  z-index: 0; /* added for the select drop down */
+}
+.ds-hover-label.ds-hover-label-focus {
+  z-index: 9999;
+}
+.ds-hover-label label {
+  position: absolute;
+  top: 0;
+  left: -999px;
+  z-index: 999;
+  padding: 14px 20px;
+  color: #909090;
+  cursor: text;
+}
+.ds-show-placeholder label {
+  opacity: 0;
+}
+.ds-hover-label-focus label {
+  top: -60px;
+  left: 0;
+  padding: 10px 20px;
+  white-space: nowrap;
+  color: #FFF;
+  background-color: #000;
+  border-radius: 3px;
+  opacity: 1;
+}
+.ds-hover-label-focus.ds-show-placeholder label {
+  opacity: 1;
+}
+.ds-hover-label-focus label:after {
+  content: '';
+  border-top: 10px solid #000;
+  left: 14px;
+  bottom: -10px;
+  border-left: 10px solid rgba(0, 0, 0, 0);
+  border-right: 10px solid rgba(0, 0, 0, 0);
+  display: block;
+  position: absolute;
+  height: 0;
+}
+.ds-hover-label-hide label {
+  visibility: hidden;
+}
+
+/* Submit button */
+.ewpcf7-submit {
+  padding: 10px 0;
+}
+
+.ewpcf7-submit .et_pb_contact_submit {
+  float:right;
+}
+.ewpcf7-submit:after{
+  content:" ";
+  display: table;
+  clear: both;
+}
+/* Lightbox */
+.ewpcf7-modal {
+  display:none;
+}
+.ewpcf7-modal.ewpcf7-modal-show-bg {
+  display: block;
+}
+.ewpcf7-modal-box {
+  opacity:0;
+  transition: opacity 1s linear;
+  position: fixed;
+  z-index: 99999991;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+  width: 300px;
+  min-height: 200px;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.5);
+  color: #404040;
+}
+.ewpcf7-close {
+  cursor: pointer;
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  font-size: 24px;
+  z-index: 999;
+  z-index: 99999992;
+}
+.ewpcf7-icon {
+  display: none;
+  width: 100%;
+  text-align: center;
+  font-size: 96px;
+}
+.ewpcf7-modal-notice .ewpcf7-icon-notice,
+.ewpcf7-modal-success .ewpcf7-icon-success {
+  display: block;
+}
+.ewpcf7-modal-content, .ewpcf7-modal-additional-messages {
+  padding: 10px 20px 20px;
+  font-size: 1.2em;
+}
+.ewpcf7-modal-content .wpcf7-mail-sent-ok,
+.ewpcf7-modal-content .wpcf7-validation-errors {
+  border: none;
+}
+.ewpcf7-modal-content .wpcf7-response-output{
+  margin: 0;
+  padding: 0;
+  display: flex !important; /* avoid scrolling of the text when CF7 sets it to display:none */
+  align-items: center;
+}
+.ewpcf7-modal-additional-messages {
+  display: none;
+  opacity: 0;
+  transition: opacity 1s linear;
+  padding: 20px 10px 10px;
+  border-top: 1px solid gray;
+}
+.ewpcf7-modal.ewpcf7-modal-show-message .ewpcf7-modal-box,
+.ewpcf7-modal .ewpcf7-modal-additional-messages.ewpcf7-modal-show-additional  {
+  display: block;
+  opacity: 1;
+  transition: opacity 1s linear;
+}
+.ewpcf7-modal-additional-messages h4.ewpcf7-modal-redirecting {
+  padding-bottom: 0;
+  font-weight: 600;
+}
+.ewpcf7-modal-background {
+    position: fixed;
+    height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 99999990;
+    background-color: rgba(0, 0, 0, .4);
+}
+
+/* Loading GIF */
+.wpcf7-loading {
+	position: relative;
+	opacity: 0.5;
+  overflow: visible;
+}
+.wpcf7-loading:before {
+	content: ' ';
+	background-image: url('../img/kloader.gif');
+	width: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 120px 120px;
+  z-index: 9999999;
+  height: 100%;
+	display: flex;
+}

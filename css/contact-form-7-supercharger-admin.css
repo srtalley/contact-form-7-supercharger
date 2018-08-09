@@ -1,0 +1,45 @@
+.ds-wp-settings-api-admin-title {
+  background-color: #3174ba;
+}
+.ds-wp-settings-api-admin-panel-wrap .button-primary, .ds-wp-settings-api-admin-panel-wrap input[type="submit"] {
+  background: #4dcba9;
+}
+.ds-wp-settings-api-attribution a {
+  color: #4dcba9;
+}
+.wpla_check_license-response-wrapper {
+  background-color: #3174ba;
+  color: #fff;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-right: 10px;
+  width: 80%;
+  min-width: 800px;
+  justify-content: space-between;
+}
+
+#wpla_check_license-response p {
+  font-size: 18px;
+}
+button#wpla_check_license {
+  transition: all 0.4s ease-in-out;
+  background-color: #fff;
+  border: none;
+  padding: 8px 20px;
+  font-size: 16px;
+  color: #3174ba;
+  font-weight: bold;
+  border: 2px solid #fff;
+}
+button#wpla_check_license:hover {
+  background-color: #3174ba;
+  color: #fff;
+}
+
+
+@media only screen and (max-width: 1023px) {
+  .wpla_check_license-response-wrapper {
+    min-width: auto;
+    width: 100%;
+  }
+}
