@@ -1,6 +1,6 @@
 <?php
 // GitHub: https://github.com/srtalley/dustysun-wp-settings-api
-// Version 1.1.8
+// Version 1.1.9
 // Author: Steve Talley
 // Organization: Dusty Sun
 // Author URL: https://dustysun.com/

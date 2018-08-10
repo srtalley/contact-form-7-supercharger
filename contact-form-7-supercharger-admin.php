@@ -13,6 +13,8 @@ class Enhanced_Contact_Form_7_Settings {
 
 	// Create the object
 	public function __construct() {
+
+		// create the various menu pages 
 		add_action( 'admin_menu', array($this, 'ds_ewpcf7_create_admin_page'));
 		
 		// Register the menu
@@ -106,7 +108,7 @@ class Enhanced_Contact_Form_7_Settings {
 					$site_link = array('support' => '<a href="' . $this->ds_ewpcf7_plugin_options['plugin_uri'] . '" target="_blank">' . __('Support', $this->ds_ewpcf7_plugin_options['plugin_domain']) . '</a>');
 					$actions = array_merge($site_link, $actions);
 
-					if ( is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) ) {
+					if ( is_plugin_active( $plugin ) ) {
 						$settings = array('settings' => '<a href="admin.php?page=' . $this->ds_ewpcf7_plugin_options['page_slug'] . '">' . __('Settings', $this->ds_ewpcf7_plugin_options['plugin_domain']) . '</a>');
 						$actions = array_merge($settings, $actions);
 					} //end if is_plugin_active			
@@ -115,7 +117,6 @@ class Enhanced_Contact_Form_7_Settings {
 			return $actions;
 
 	} // end function ds_ewpcf7_add_action_plugin
-
 
 	public function ds_ewpcf7_upgrade_process(){
 
@@ -135,6 +136,11 @@ class Enhanced_Contact_Form_7_Settings {
 			{
 				update_option($this->ds_ewpcf7_plugin_options['plugin_slug'] . '_wpla_license_key', $ds_ewpcf7_update_settings['ds_ewpcf7_update_serialnumber']);
 			} // end if
+
+			// transfer the daily news check to daily license check
+			$ds_ewpcf7_daily_news_check =  get_option($this->ds_ewpcf7_plugin_options['plugin_slug'] . '_daily_news_check', true);
+
+			update_option($this->ds_ewpcf7_plugin_options['plugin_slug'] . '_daily_license_check', $ds_ewpcf7_daily_news_check);
 
 			$update_db_flag = true;
 		} else if($db_plugin_settings['version'] < $this->ds_ewpcf7_plugin_options['version']) {

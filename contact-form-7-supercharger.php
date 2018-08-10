@@ -37,17 +37,6 @@ class Enhanced_Contact_Form_7 {
   private $plugin_settings;
   private $redirectpage;
   private $utm;
-  protected function wl ( $log )  {
-    if(defined('WP_LICENSE_AGENT_DEBUG')) {
-      if ( true === WP_LICENSE_AGENT_DEBUG ) {
-        if ( is_array( $log ) || is_object( $log ) ) {
-          error_log( print_r( $log, true ) );
-        } else {
-          error_log( $log );
-        }
-      }
-    }
-  } // end function wl
 
   public function __construct() {
 
@@ -58,8 +47,10 @@ class Enhanced_Contact_Form_7 {
     $this->redirectpage = new RedirectPage_Module();
 
     add_action('plugins_loaded', array($this, 'ds_ewpcf7_build_update_checker') );
+    
     $ds_ewpcf7_keep_processing = true;
 
+    // get the settings
     $this->ds_ewpcf7_get_current_settings();
 
     // check if the license is valid

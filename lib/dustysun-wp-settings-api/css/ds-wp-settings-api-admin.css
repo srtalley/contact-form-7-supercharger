@@ -1,5 +1,5 @@
 /* ADMIN STYLES */
-/* v1.1.8 */
+/* v1.1.9 */
 #ds-wp-settings-logo {
   max-height: 100px;
   width:auto;
@@ -41,24 +41,25 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: space-between;
 }
 .ds-wp-settings-flex-columns .ds-wp-settings-one-third {
-  flex: 1 1 33.3333%;
+  width: 33%
 }
 .ds-wp-settings-flex-columns .ds-wp-settings-two-thirds {
-  flex: 1 1 66.6666%;
+  width: 66%;
 }
 .ds-wp-settings-flex-columns .ds-wp-settings-one-half {
-  flex: 1 1 50%;
+  width: 49.5%;
 }
 .ds-wp-settings-flex-columns .ds-wp-settings-one-quarter {
-  flex: 1 1 25%;
+  width: 24.5%;
 }
 .ds-wp-settings-flex-columns .ds-wp-settings-three-quarters {
-  flex: 1 1 75%;
+  width: 74.5%;
 }
 .ds-wp-settings-flex-columns .ds-wp-settings-full-width {
-  flex: 1 1 100%;
+  width: 100%;
 }
 .ds-wp-settings-vertical-align {
   display: flex;
