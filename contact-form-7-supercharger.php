@@ -37,17 +37,22 @@ class Enhanced_Contact_Form_7 {
   private $plugin_settings;
   private $redirectpage;
   private $utm;
+  protected function wl ( $log )  {
+    if(defined('WP_LICENSE_AGENT_DEBUG')) {
+      if ( true === WP_LICENSE_AGENT_DEBUG ) {
+        if ( is_array( $log ) || is_object( $log ) ) {
+          error_log( print_r( $log, true ) );
+        } else {
+          error_log( $log );
+        }
+      }
+    }
+  } // end function wl
 
   public function __construct() {
 
-    $this->ds_ewpcf7_create_settings_obj();
-
-    // get the settings
-    $this->current_settings = $this->ds_ewpcf7_settings_obj->get_current_settings();
-    $this->plugin_settings = $this->ds_ewpcf7_settings_obj->get_plugin_options();
     // set the default settings
 		register_activation_hook( __FILE__, array($this, 'ds_ewpcf7_default_settings' ));
-
     // construct tag generators
     $this->utm = new UTM_Module();
     $this->redirectpage = new RedirectPage_Module();
@@ -55,13 +60,17 @@ class Enhanced_Contact_Form_7 {
     add_action('plugins_loaded', array($this, 'ds_ewpcf7_build_update_checker') );
     $ds_ewpcf7_keep_processing = true;
 
+    $this->ds_ewpcf7_get_current_settings();
+
     // check if the license is valid
-    $ds_ewpcf7_plugin_slug = $this->plugin_settings['page_slug'];
+    $ds_ewpcf7_plugin_slug = $this->plugin_settings['plugin_slug'];
 
     $license_info = get_option($ds_ewpcf7_plugin_slug . '_daily_license_check', true);
 
     //check if the license is valid and if we are disabling functions
-    if(!$license_info->valid && $license_info->disable_functionality) $ds_ewpcf7_keep_processing = false;
+    if(isset($license_info->valid) && !$license_info->valid && $license_info->disable_functionality) {
+      $ds_ewpcf7_keep_processing = false;
+    } // end if
 
     if($ds_ewpcf7_keep_processing) {
       // Register scripts
@@ -88,16 +97,20 @@ class Enhanced_Contact_Form_7 {
 
   } // end public function __construct
 
-public function ds_ewpcf7_create_settings_obj(){
+public function ds_ewpcf7_get_current_settings(){
     // set the settings api options
     $ds_api_settings = array(
       'json_file' => plugin_dir_path( __FILE__ ) . '/contact-form-7-supercharger.json'
     );
     $this->ds_ewpcf7_settings_obj = new DSWPSettingsAPI\SettingsBuilder($ds_api_settings);
 
-  } // end function ds_ewpcf7_create_settings_obj
+    // get the settings
+    $this->current_settings = $this->ds_ewpcf7_settings_obj->get_current_settings();
+    $this->plugin_settings = $this->ds_ewpcf7_settings_obj->get_plugin_options();
+  } // end function ds_ewpcf7_get_current_settings
 
   public function ds_ewpcf7_default_settings() {
+    $this->ds_ewpcf7_get_current_settings();
     $this->ds_ewpcf7_settings_obj->set_current_settings(true);
     $this->ds_ewpcf7_settings_obj->set_plugin_options(true);
   } // end function ds_ewpcf7_default_settings()
@@ -149,8 +162,12 @@ public function ds_ewpcf7_create_settings_obj(){
 
   // modify the form response
   public function ds_ewpcf7_add_form_class($class) {
-    $newclass = $class . ' ds-ewpcf7';
-    return $newclass;
+    $newclasses = $class . ' ds-ewpcf7';
+
+    if($this->current_settings['ds_ewpcf7_form_style_options']['lightbox_enabled'] == "yes") { 
+      $newclasses = $newclasses . ' ds-ewpcf7-lightbox-enabled';
+    } // end if
+    return $newclasses;
   } // end ds_ewpcf7_add_form_class
 
   function ds_ewpcf7_modify_form_response_output($content) {
@@ -427,7 +444,7 @@ public function ds_ewpcf7_create_settings_obj(){
   } // end function ds_ewpcf7_modify_mail
 
   public function ds_ewpcf7_build_update_checker() {
-
+    $this->ds_ewpcf7_get_current_settings();
     $settings = array(
       'update_url' => $this->plugin_settings['wpla_update_url'],
       'update_slug' => $this->plugin_settings['plugin_slug'],

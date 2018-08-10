@@ -15,7 +15,7 @@ namespace DustySun\WP_License_Agent\Updater\v1_4;
 if(!class_exists('DustySun\WP_License_Agent\Updater\v1_4\License_Panel')) { 
     class License_Panel {
     
-    static function show_license_panel($update_slug) {
+    static function show_license_panel($update_slug, $refresh_on_valid = false) {
 
         if($update_slug == '') {
             wp_die('You must call show_license_panel with an update slug.');
@@ -111,7 +111,7 @@ if(!class_exists('DustySun\WP_License_Agent\Updater\v1_4\License_Panel')) {
                   <div class="wpla-lightbox-modal-inner">
                     <div class="wpla-lightbox-modal-content">
                     <div class="wpla-lightbox-title">' . $update_title . '</div>';
-                    $ds_wpla_lightbox_output_inner_html .= License_Panel::show_license_panel($update_slug);
+                    $ds_wpla_lightbox_output_inner_html .= License_Panel::show_license_panel($update_slug, true);
                 $ds_wpla_lightbox_output_inner_html .= '</div>
                   </div> <!--wpla-lightbox-modal-inner-->
                 </div> <!--wpla-lightbox-modal-box-->
@@ -122,7 +122,7 @@ if(!class_exists('DustySun\WP_License_Agent\Updater\v1_4\License_Panel')) {
 
     } // end static function show_license_lightbox
     static function register_ds_wp_settings_api_admin_styles_scripts() {
-        wp_enqueue_script( 'wpla-generate-license', plugins_url( '/includes/generate-license.js', __FILE__ ), '', false, true );
-        wp_enqueue_style('wpla-generate-license', plugins_url('/includes/generate-license.css', __FILE__));
+        wp_enqueue_script( 'wpla-generate-license-1-4', plugins_url( '/includes/generate-license.js', __FILE__ ), '', false, true );
+        wp_enqueue_style('wpla-generate-license-1-4', plugins_url('/includes/generate-license.css', __FILE__));
     }
 }} // end class

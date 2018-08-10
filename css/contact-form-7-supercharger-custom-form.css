@@ -98,8 +98,8 @@ div.wpcf7 .ajax-loader {
 /* Not valid tips */
 
 .wpcf7-form.ds-ewpcf7 span.wpcf7-not-valid-tip {
-  position: absolute;
-  top: 26px;
+  /* position: absolute; */
+  /* top: 26px; */
   padding: 0 16px;
   white-space: nowrap;
   background-color: #ce0000;

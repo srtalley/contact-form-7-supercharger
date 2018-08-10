@@ -32,50 +32,57 @@ class Licensing_Agent {
 
     if($this->update_settings['puc_errors']) {
       add_action( 'admin_notices', array($this, 'show_puc_admin_error') );
-    }
+    } //end if
 
     if($this->update_settings['license_errors']) {
-      add_action( 'admin_notices', array($this, 'show_license_error_banner') );
-    }
+      add_action( 'admin_notices', array($this, 'show_general_admin_notices') );
+    } // end if
+
+    add_action( 'admin_notices', array($this, 'show_license_error_banner') );
+
+    add_action( 'admin_enqueue_scripts', array( $this, 'register_update_checker_scripts' ));
 
     add_filter('plugin_action_links_' . plugin_basename($this->update_settings['main_file']), array($this, 'wpla_show_plugin_license_link'), 9, 2);
     add_action('admin_footer-plugins.php', array($this, 'wpla_plugins_show_license_lightbox'));
 
-    add_action( 'admin_print_scripts', array($this, 'print_update_checker_scripts'), 100, 10 );
-
     add_filter( 'puc_request_info_result-' . $this->update_settings['update_slug'], array($this, 'update_checker_info_result') );
 
-    add_action( 'wp_ajax_wpla_dismiss_puc_error-' . $this->update_settings['update_slug'],  array($this, 'wpla_dismiss_puc_error') );
+    add_action( 'wp_ajax_wpla_dismiss_admin_notice-' . $this->update_settings['update_slug'],  array($this, 'wpla_dismiss_admin_notice') );
 
     // register the cron callback
     add_action($this->update_settings['update_slug'] . '_daily_license_check', array($this, 'retrieve_product_license_info'));
 
     if (! wp_next_scheduled ( $this->update_settings['update_slug'] . '_daily_license_check' )) {
       wp_schedule_event(time(), 'daily', $this->update_settings['update_slug'] . '_daily_license_check');
-   }
+      //run the product license check to set default keys
+      $this->retrieve_product_license_info();
+   } // end if
 
     //allow the REST license check to be done via AJAX
     add_action('wp_ajax_retrieve_license_info-' . $this->update_settings['update_slug'] , array($this, 'retrieve_product_license_info_ajax_handler'));
 
-
     if(isset($this->update_settings['news_widget']) && $this->update_settings['news_widget']) {   
       // Register the new dashboard widget with the 'wp_dashboard_setup' action
       add_action('wp_dashboard_setup', array($this, 'add_dashboard_widgets') );
-    }
+    } // end if 
+
+    //allow setting the license changed to valid transient via ajax 
+    add_action('wp_ajax_set_license_changed_to_valid_transient-' . $this->update_settings['update_slug'] , array($this, 'set_license_changed_to_valid_transient_ajax_handler'));
 
     register_deactivation_hook($this->update_settings['main_file'], array($this, 'wpla_deactivation_hook'));
 
   } //end function __construct
+
   protected function wl ( $log )  {
-      // if(defined('WP_LICENSE_AGENT_DEBUG')) {
-        // if ( true === WP_LICENSE_AGENT_DEBUG ) {
-            if ( is_array( $log ) || is_object( $log ) ) {
-                error_log( print_r( $log, true ) );
-            } else {
-                error_log( $log );
-            }
-        // }
-      // }
+    if(defined('WP_LICENSE_AGENT_DEBUG')) {
+      if ( true === WP_LICENSE_AGENT_DEBUG ) {
+        if ( is_array( $log ) || is_object( $log ) ) {
+          error_log( print_r( $log, true ) );
+        } else {
+          error_log( $log );
+        }
+      }
+    }
   } // end function wl
 
   public function set_update_settings ($settings) {
@@ -109,19 +116,11 @@ class Licensing_Agent {
     } // end if
 
   } // end function set_update_settings
-  public function show_puc_admin_error() {
-    $error_message = get_option($this->update_settings['update_slug'] . '_puc_error', true);
-
-    if(!is_array($error_message) && $error_message != '' && $error_message != null && $error_message != '1' && $error_message != 1) {
-      printf( '<div class="notice-mluc notice notice-error is-dismissible" data-notice="' . $this->update_settings['update_slug'] . '_puc_error"><p>' . $error_message . '</p></div>');
-    } //end if($error_message != '' || $error_message != null)
-  } //end functionshow_puc_admin_error
 
   public function update_checker_info_result($request) {
     if(isset($request->license_error)) {
       if($request->license_error) {
         update_option($this->update_settings['update_slug'] . '_puc_error', $request->license_error);
-        // add_action( 'admin_notices', array($this, 'show_puc_admin_error'));
       }
     } else {
       //clear any db error
@@ -130,8 +129,7 @@ class Licensing_Agent {
     return $request;
   } // end function  update_checker_info_result
 
-  protected function build_wpla_update_checker() {
-
+  public function build_wpla_update_checker() {
     // see if development versions are selected
     if(isset($this->update_settings['development']) && !empty($this->update_settings['development']) && is_bool($this->update_settings['development'])) {
       $development_versions = $this->update_settings['development'];
@@ -154,40 +152,24 @@ class Licensing_Agent {
       $this->update_settings['update_slug']
     );
   } // end function build_wpla_update_checker
+  
 
-  public function print_update_checker_scripts() {
-    ?>
-      <script type="text/javascript">
-        jQuery(function($) {
-        // Hook into the "notice-mluc" class we added to the notice, so
-        // Only listen to YOUR notices being dismissed
-        $( document ).on( 'click', '.notice-mluc .notice-dismiss', function () {
-            // Read the "data-notice" information to track which notice
-            // is being dismissed and send it via AJAX
-            var type = $( this ).closest( '.notice-mluc' ).data( 'notice' );
-            console.log(type);
-            // Make an AJAX call
-            // Since WP 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-            $.ajax( ajaxurl,
-              {
-                type: 'POST',
-                data: {
-                  action: 'wpla_dismiss_puc_error-<?php echo $this->update_settings['update_slug']; ?>',
-                  type: type,
-                }
-              } );
-          } );
-        });
-      </script>
-    <?php
-  } //end function
+  public function register_update_checker_scripts() {
+    wp_enqueue_script( 'wpla-updater-1-4', plugins_url( '/js/updater.js', __FILE__ ), '', false, true );
+  } // end register_update_checker_scripts
 
   // Clear the puc error message for this plugin or theme
-  public function wpla_dismiss_puc_error() {
-    // Pick up the notice "type" - passed via jQuery (the "data-notice" attribute on the notice)
-    $type = $_POST['type'];
+  public function wpla_dismiss_admin_notice( $type = '') {
+    if(isset($_POST['type']) && $_POST['type'] != ''){
+      // Pick up the notice "type" - passed via jQuery (the "data-notice" attribute on the notice)
+      $type = $_POST['type'];
+    } else if( $type == '') {
+      return;
+    } // end if
+
+    // update with either the type passed to the function or use the POST value
     update_option($type, '');
-  } //end function wpla_dismiss_puc_error
+  } //end function wpla_dismiss_admin_notice
 
   // Function that outputs the contents of the dashboard widget
   public function dashboard_widget_function($post, $callback_args) {
@@ -195,9 +177,10 @@ class Licensing_Agent {
       echo '<p><strong>License Status: </strong>  Active</p>';
       echo '<p><strong>Expires: </strong> ' . $callback_args['args']->expiration . '</p>';
     } else {
+      // default text
       echo '<p><strong>License Status: </strong>  None - you are not licensed</p>';
       if(isset($callback_args['args']->expiration)) {
-        echo '<strong>License expired on ' . $callback_args['args']->expiration . ' - please update your license to continue to get support and updates!';
+        echo '<strong>License expired on ' . $callback_args['args']->expiration . '.';
       }
     }
     if(isset($callback_args['args']->customer_message) && $callback_args['args']->customer_message != '' ) {
@@ -258,6 +241,14 @@ class Licensing_Agent {
 
   } // end function retrieve_product_license_info
 
+  public function show_puc_admin_error() {
+    $error_message = get_option($this->update_settings['update_slug'] . '_puc_error', true);
+
+    if(!is_array($error_message) && $error_message != '' && $error_message != null && $error_message != '1' && $error_message != 1) {
+      printf( '<div class="notice-wpla notice notice-error is-dismissible" data-update-slug="' . $this->update_settings['update_slug'] . '" data-type="_puc_error"><p>' . $error_message . '</p></div>');
+    } //end if($error_message != '' || $error_message != null)
+  } //end functionshow_puc_admin_error
+
   public function show_license_error_banner() {
     // check the license validity
 		$license_info = get_option($this->update_settings['update_slug'] . '_daily_license_check', true);
@@ -278,6 +269,29 @@ class Licensing_Agent {
 
 		} // end if( isset($license_info->valid ) && !$license_info->valid )
   } // end function show_license_error_banner
+
+  // Admin notice
+	public function show_general_admin_notices() {
+
+		if( get_transient( $this->update_settings['update_slug'] . '_license_changed_to_valid' ) ) {
+			echo '<div class="notice notice-success"><p>' . __( 'Thanks for updating your license for ' . $this->get_product_name() . '.' , 'ds_wpla' ) . '</p></div>';
+			delete_transient( $this->update_settings['update_slug'] . '_license_changed_to_valid' );
+		}
+  } //end function show_general_admin_notices
+  
+  public function set_license_changed_to_valid_transient_ajax_handler() {
+    if(isset($_POST['update_transient']) && $_POST['update_transient'] == true) {
+      // clear any puc errors
+      $this->wpla_dismiss_admin_notice($this->update_settings['update_slug'] . '_puc_error');
+      set_transient($this->update_settings['update_slug'] . '_license_changed_to_valid', 1);
+      $json_output = array(
+        'message' => 'Transient ' . $this->update_settings['update_slug'] . '_license_changed_to_valid was set'
+      );
+      wp_send_json($json_output);
+      wp_die();
+    } //end if
+  } // end set_license_changed_to_valid_transient
+
   public function retrieve_product_license_info_ajax_handler() {
     if(isset($_POST['get_license_info']) && $_POST['get_license_info'] == true) {
       $json_output = array(
@@ -296,9 +310,8 @@ class Licensing_Agent {
   } // end function wpla_show_plugin_license_link
   
   public function wpla_plugins_show_license_lightbox() {
-  // generate the lightbox
+    // generate the lightbox
     echo License_Panel::show_license_lightbox($this->update_settings['update_slug'], $this->get_product_name() . ': License Information');
-
-  }
+  } // end function wpla_plugins_show_license_lightbox
   
 }} //end class

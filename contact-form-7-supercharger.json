@@ -16,6 +16,10 @@
     "wpla_update_url":"https://dustysun.com"
   },
   "about_sections":{
+    "ds_ewpcf7_license":{
+      "title":"Enter your license key and email below",
+      "tab_label":"License"
+    },
     "ds_ewpcf7_help":{
       "title":"How to Use This Plugin",
       "tab_label":"Help"
@@ -27,8 +31,8 @@
   },
   "options":{
     "ds_ewpcf7_form_style":{
-      "title":"Main Settings",
-      "tab_label":"General",
+      "title":"Settings below affect all CF7 forms",
+      "tab_label":"Global Form Styles",
         "fields":[{
             "id":"hover_label_bg_color",
             "label":"Hover Label Background Color:",
@@ -40,27 +44,8 @@
             "type":"color_picker",
             "value":"#FFF"
           },{
-            "id":"error_icon",
-            "label":"Error message icon:",
-            "type":"fontawesome_picker",
-            "value":"fas fa-info-circle"
-            },{
-              "id":"success_icon",
-              "label":"Success message icon:",
-              "type":"fontawesome_picker",
-              "value":"fas fa-check-circle"
-            },{
-              "id":"submit_button_type",
-              "label":"Change default submit button style:",
-              "type":"radio_on_off",
-              "options":{
-                "default":"Input",
-                "button":"Button"
-                },
-              "value":"button"
-            },{
               "id":"form_style",
-              "label":"Use CSS for form:",
+              "label":"Use our modern CSS for forms instead of the default, plan CF7 styles:",
               "type":"radio_on_off",
               "options":{
                 "yes":"Custom",
@@ -68,14 +53,33 @@
                 },
               "value":"yes"
             },{
+              "id":"submit_button_type",
+              "label":"Change default submit button to an HTML button instead of an input (generally looks better):",
+              "type":"radio_on_off",
+              "options":{
+                "default":"Input",
+                "button":"Button"
+                },
+              "value":"button"
+            },{
               "id":"lightbox_enabled",
-              "label":"Use lightbox for notifications:",
+              "label":"Use lightbox for CF7 messages (error, successful send, etc):",
               "type":"radio_on_off",
               "options":{
                 "yes":"Yes",
                 "no":"No"
                 },
               "value":"yes"
+          },{
+            "id":"error_icon",
+            "label":"Error message icon (in lightbox):",
+            "type":"fontawesome_picker",
+            "value":"fas fa-info-circle"
+          },{
+            "id":"success_icon",
+            "label":"Success message icon (in lightbox):",
+            "type":"fontawesome_picker",
+            "value":"fas fa-check-circle"
           }]
     },
     "ds_ewpcf7_utm_tracking":{

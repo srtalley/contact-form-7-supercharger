@@ -1,8 +1,6 @@
-
-<style>
-    
-</style>
-
+<?php 
+// v1.4.4
+?>
 <div class="wpla-check-license-panel">
     <form id="<?php echo $update_slug; ?>_wpla-license-entry" class="wpla-license-entry" data-update-slug="<?php echo $update_slug; ?>" method="POST">
         
@@ -12,6 +10,11 @@
             <input type="hidden" id="<?php echo $update_slug; ?>_wpla_disable_functionality" value="true">
         <?php } else { ?>
             <input type="hidden" id="<?php echo $update_slug; ?>_wpla_disable_functionality" value="false">
+        <?php } ?>
+        <?php if($refresh_on_valid && !$license_valid){ // refresh if the license wasn't valid to start with ?>
+            <input type="hidden" id="<?php echo $update_slug; ?>_wpla_refresh_on_valid" value="true">
+        <?php } else { ?>
+            <input type="hidden" id="<?php echo $update_slug; ?>_wpla_refresh_on_valid" value="false">
         <?php } ?>
         <div class="wpla-license-values-updated <?php echo $updated_message_class; ?> ">
             <h4>Values updated</h4>
@@ -30,6 +33,5 @@
             </div>
         <div><button class="wpla-check-license" name="get_news" value=true>Check License</button></div>
         </div>
-        
     </form>
 </div>

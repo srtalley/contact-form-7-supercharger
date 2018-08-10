@@ -1,4 +1,5 @@
 <?php
+namespace DustySun\CF7_Supercharger;
 use \DustySun\WP_Settings_API\v1_2 as DSWPSettingsAPI;
 class Enhanced_Contact_Form_7_Settings {
 
@@ -12,23 +13,8 @@ class Enhanced_Contact_Form_7_Settings {
 
 	// Create the object
 	public function __construct() {
-
-		// set the settings api options
-		$ds_api_settings = array(
-			'json_file' => plugin_dir_path( __FILE__ ) . '/contact-form-7-supercharger.json',
-			'register_settings' => true, 
-			'views_dir' => plugin_dir_path( __FILE__ ) . '/admin/views'
-		);
-
-		// Create the settings object
-		$this->ds_ewpcf7_settings_page = new DSWPSettingsAPI\SettingsBuilder($ds_api_settings);
-
-		// Get the current settings
-		$this->ds_ewpcf7_settings = $this->ds_ewpcf7_settings_page->get_current_settings();
-
-		// Get the plugin options
-		$this->ds_ewpcf7_plugin_options = $this->ds_ewpcf7_settings_page->get_plugin_options();
-
+		add_action( 'admin_menu', array($this, 'ds_ewpcf7_create_admin_page'));
+		
 		// Register the menu
 		add_action( 'admin_menu', array($this, 'ds_ewpcf7_admin_menu' ));
 
@@ -45,6 +31,24 @@ class Enhanced_Contact_Form_7_Settings {
 		add_action( 'upgrader_process_complete', array($this,'ds_ewpcf7_wp_upgrade_complete'), 10, 2);
 
 	} // end public function __construct()
+
+	public function ds_ewpcf7_create_admin_page() {
+		// set the settings api options
+		$ds_api_settings = array(
+			'json_file' => plugin_dir_path( __FILE__ ) . '/contact-form-7-supercharger.json',
+			'register_settings' => true, 
+			'views_dir' => plugin_dir_path( __FILE__ ) . '/admin/views'
+		);
+
+		// Create the settings object
+		$this->ds_ewpcf7_settings_page = new DSWPSettingsAPI\SettingsBuilder($ds_api_settings);
+
+		// Get the current settings
+		$this->ds_ewpcf7_settings = $this->ds_ewpcf7_settings_page->get_current_settings();
+
+		// Get the plugin options
+		$this->ds_ewpcf7_plugin_options = $this->ds_ewpcf7_settings_page->get_plugin_options();
+	} // end function ds_ewpcf7_create_admin_page
 
 	// Adds admin menu under the Sections section in the Dashboard
 	public function ds_ewpcf7_admin_menu() {

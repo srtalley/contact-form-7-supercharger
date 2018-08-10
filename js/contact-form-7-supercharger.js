@@ -1,4 +1,4 @@
-//1.0.2.1
+//1.3
 
 jQuery(function($) {
 
@@ -31,6 +31,14 @@ document.addEventListener('wpcf7invalid', function (event){
   $('#' + event.target.id + ' .wpcf7-not-valid:first').focus();
 
 }); //end $(document).on('invalid.wpcf7', function ()
+
+//Events to listen to
+document.addEventListener('wpcf7spam', function (event){
+  showDSModal(event.target, 'notice');
+}); //end 
+document.addEventListener('wpcf7mailfailed', function (event){
+  showDSModal(event.target, 'notice');
+}); //end 
 
 //Events to listen to
 document.addEventListener('wpcf7mailsent', function (event){
@@ -74,7 +82,6 @@ document.addEventListener('wpcf7submit', function (event){
 });
 //Add the loading class
 $('.wpcf7').submit(function(){
-  // $(this).addClass('wpcf7-loading');
   $('body').addClass('wpcf7-loading');
 
 });
