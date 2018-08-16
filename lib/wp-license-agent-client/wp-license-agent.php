@@ -2,7 +2,7 @@
 /*
  * WP License Agent Update Checker Plugin & Theme Update Library
  *
- * Version 1.5.3
+ * Version 1.5.4
  *
  * https://dustysun.com
  *

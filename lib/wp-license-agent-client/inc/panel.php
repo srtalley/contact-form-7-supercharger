@@ -2,7 +2,7 @@
 /*
  * WP License Agent License Entry
  *
- * Version 1.5.3
+ * Version 1.5.4
  *
  * https://dustysun.com
  *
@@ -22,8 +22,6 @@ if(!class_exists('DustySun\WP_License_Agent\Client\v1_5\License_Panel')) {
     public function __construct($update_slug = '', $refresh_on_valid = true) {
 
         if($update_slug == '') {
-            // see if the session vars are set
-
             wp_die('You must call License_Panel class with the array of update settings.');
         }
 

@@ -2,7 +2,7 @@
 /*
  * WP License Agent Update Checker Plugin & Theme Updater
  *
- * Version 1.5.3
+ * Version 1.5.4
  *
  * https://dustysun.com
  *
@@ -28,15 +28,20 @@ class Licensing_Agent {
   private $update_url;
   private $checklicense_url;
   private $license_panel;
+  private $product_type;
 
   public function __construct($settings = null) {
+
     // set up the update settings
     $this->set_update_settings($settings);
     // create the update checker
     $this->build_wpla_update_checker();
     // see if the current license info should be retrieved
     $this->run_conditional_license_update_check();
-    // generate the lightbox
+    // see if we're a plugin or theme 
+    $this->product_type = WPLA_Client_Factory::get_product_type(__DIR__);
+
+    // generate the license panel class
     $this->license_panel = new License_Panel($this->update_settings['update_slug']);
 
     if($this->update_settings['puc_errors']) {
@@ -51,8 +56,10 @@ class Licensing_Agent {
 
     add_action( 'admin_enqueue_scripts', array( $this, 'register_update_checker_scripts' ));
 
-    add_filter('plugin_action_links_' . plugin_basename($this->update_settings['main_file']), array($this, 'wpla_show_plugin_license_link'), 9, 2);
-    add_action('admin_footer-plugins.php', array($this, 'wpla_plugins_show_license_lightbox'));
+    if($this->product_type == 'plugin' || $this->product_type == 'mu-plugin') {
+      add_filter('plugin_action_links_' . plugin_basename($this->update_settings['main_file']), array($this, 'wpla_show_plugin_license_link'), 9, 2);
+      add_action('admin_footer-plugins.php', array($this, 'wpla_plugins_show_license_lightbox'));
+    } // end if plugin
 
     add_filter( 'puc_request_info_result-' . $this->update_settings['update_slug'], array($this, 'update_checker_info_result') );
 
@@ -299,11 +306,9 @@ class Licensing_Agent {
   } // end function show_license_error_banner
 
   private function get_product_name() {
-    $product_type = WPLA_Client_Factory::get_product_type(__DIR__);
-
-    if($product_type == 'plugin' || $product_type == 'mu-plugin') {
+    if($this->product_type == 'plugin' || $this->product_type == 'mu-plugin') {
         $product_name = get_plugin_data($this->update_settings['main_file'])['Name'];
-    } else if($product_type == 'theme' || $product_type == 'child-theme') { 
+    } else if($this->product_type == 'theme' || $this->product_type == 'child-theme') { 
         $product_name = wp_get_theme($this->update_settings['update_slug'])['Name'];
     } // end if 
     
@@ -319,12 +324,14 @@ class Licensing_Agent {
     } // end if 
     
     // if it's a theme 
-    if(get_current_screen()->base == 'themes') {
-      
-      $show_license_panel = $this->license_panel->show_license_panel();
-      
-      echo '<div class="notice"><h1>' . __( $this->get_product_name() . ' License Info' , 'ds_wpla' ) .'</h1>' . __('<p>Enter your license key or check the status of your key in the form below.</p>', 'ds_wpla') . $show_license_panel . '<p></p></div>';
-    } // end if 
+    if($this->product_type == 'theme' || $this->product_type == 'child-theme') { 
+      if(get_current_screen()->base == 'themes') {
+        
+        $show_license_panel = $this->license_panel->show_license_panel();
+        
+        echo '<div class="notice"><h1>' . __( $this->get_product_name() . ' License Info' , 'ds_wpla' ) .'</h1>' . __('<p>Enter your license key or check the status of your key in the form below.</p>', 'ds_wpla') . $show_license_panel . '<p></p></div>';
+      } // end if 
+    } // end if theme 
 
   } //end function show_general_admin_notices
   

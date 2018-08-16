@@ -124,7 +124,7 @@ class Enhanced_Contact_Form_7_Settings {
 			delete_option('ds_ewpcf7_plugin_settings');
 			update_option('ds_ewpcf7_main_settings', $db_plugin_settings);
 		} else {
-			$db_plugin_settings = get_option('ds_ucfml_main_settings');
+			$db_plugin_settings = get_option('ds_ewpcf7_main_settings');
 		} // end if
 
 		if($db_plugin_settings['version'] < '1.3') {
@@ -152,7 +152,7 @@ class Enhanced_Contact_Form_7_Settings {
 
 			$update_db_flag = true;
 		} // end if < 1.3
-		
+
 		if($db_plugin_settings['version'] != $this->ds_ewpcf7_main_settings['version']) {
 			$update_db_flag = true;
 		} // end if 
@@ -162,14 +162,16 @@ class Enhanced_Contact_Form_7_Settings {
 			$this->ds_ewpcf7_settings_page->wl('Updating Dusty Sun CF7 SUPERCHARGER settings in DB...');
 			$this->ds_ewpcf7_settings_page->set_main_settings(true);
 		} // end if($update_db_flag) 
-		
+
    } // end function ds_ewpcf7_upgrade_process
 
    public function ds_ewpcf7_wp_upgrade_complete( $upgrader_object, $options ) {
 	   $current_plugin_path_name = plugin_basename(__DIR__) . '/contact-form-7-supercharger.php';
 	   if ($options['action'] == 'update' && $options['type'] == 'plugin' ){
-	  foreach($options['plugins'] as $each_plugin){
-				set_transient('ds_ewpcf7_updated', 1);
+	    	foreach($options['plugins'] as $each_plugin){
+				if ($each_plugin == $current_plugin_path_name) {
+					set_transient('ds_ewpcf7_updated', 1);
+				} // end if ($each_plugin == $current_plugin_path_name)
 			} // end foreach($options['plugins'] as $each_plugin)
 		} // end if ($options['action'] == 'update' && $options['type'] == 'plugin' )
    } // end function ds_ewpcf7_wp_upgrade_complete
