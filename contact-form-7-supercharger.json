@@ -1,16 +1,16 @@
-{ "plugin_settings":{
-    "plugin_domain":"ds_ewpcf7",
+{ "main_settings":{
+    "name":"Contact Form 7 SUPERCHARGER",
+    "text_domain":"ds_ewpcf7",
     "tabs":"true",
     "options_suffix":"_options",
     "page_suffix":"_page",
     "author":"Dusty Sun",
     "author_uri":"https://dustysun.com",
-    "plugin_name":"Contact Form 7 SUPERCHARGER",
     "plugin_uri":"https://dustysun.com/contact-form-7-supercharger/",
     "support_uri":"https://dustysun.com/wordpress-plugin-theme-support/",
     "support_email":"support@dustysun.com",
     "page_slug":"contact-form-7-supercharger",
-    "plugin_slug":"contact-form-7-supercharger",
+    "item_slug":"contact-form-7-supercharger",
     "page_hook":"contact_page_contact-form-7-supercharger",
     "version":"1.3",
     "wpla_update_url":"https://dustysun.com"

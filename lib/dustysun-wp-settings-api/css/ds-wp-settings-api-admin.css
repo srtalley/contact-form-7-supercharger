@@ -1,13 +1,13 @@
 /* ADMIN STYLES */
-/* v1.1.9 */
+/* v2.0 */
 #ds-wp-settings-logo {
   max-height: 100px;
   width:auto;
 }
-.ds-wp-settings-api-plugin-panel-wrap * {
+.ds-wp-settings-api-panel-wrap * {
   box-sizing: border-box;
 }
-.ds-wp-settings-api-plugin-panel-wrap img {
+.ds-wp-settings-api-panel-wrap img {
   max-width: 100%;
   height: auto;
 }
@@ -16,17 +16,17 @@
   text-transform: uppercase;
 }
 .ds-wp-settings-first-title {
-  margin-top: 0;
+  margin-top: 10px;
 }
-.ds-wp-settings-api-plugin-panel-wrap h2 {
+.ds-wp-settings-api-panel-wrap h2 {
   font-size: 1.5em;
   line-height: 1.5em;
 }
-.ds-wp-settings-api-plugin-panel-wrap h3 {
+.ds-wp-settings-api-panel-wrap h3 {
   font-size: 1.3em;
   line-height: 1.3em;
 }
-.ds-wp-settings-api-plugin-panel-wrap h4 {
+.ds-wp-settings-api-panel-wrap h4 {
   font-size: 1.1em;
   line-height: 1.4em;
 }
@@ -118,15 +118,15 @@
 .ds-wp-settings-api-share-box *:last-child {
   margin-right: 0;
 }
-.ds-wp-settings-api-plugin-panel-wrap {
+.ds-wp-settings-api-panel-wrap {
   margin-top: 20px;
   margin-right: 20px;
   background-color: #FFF;
 }
-.ds-wp-settings-api-plugin-panel-wrap {
+.ds-wp-settings-api-panel-wrap {
   font-family: 'Open Sans', Arial, sans-serif;
 }
-.ds-wp-settings-api-plugin-panel-wrap pre {
+.ds-wp-settings-api-panel-wrap pre {
   overflow-x:auto;
   overflow-y:hidden;
 }
@@ -143,7 +143,7 @@
 }
 /* TITLE AREA*/
 .ds-wp-settings-api-admin-title {
-  background-color: #23282e;
+  background-color: #07090c;
   margin: 0;
   padding: 30px 10px;
   line-height: 40px;
@@ -170,7 +170,7 @@
   justify-content: space-between;
 }
 .ds-wp-settings-api-attribution a {
-  color: #8ddaff;
+  color: #f3f3f3;
   text-decoration: none;
 }
 .ds-wp-settings-api-attribution a:hover {
@@ -201,12 +201,12 @@
   box-shadow:none;
 }
 /* LIST ELEMENTS */
-.ds-wp-settings-api-plugin-panel-wrap ul {
+.ds-wp-settings-api-panel-wrap ul {
   list-style: disc;
   margin-left: 3em;
 }
-.ds-wp-settings-api-plugin-panel-wrap ul img,
-.ds-wp-settings-api-plugin-panel-wrap ol img  {
+.ds-wp-settings-api-panel-wrap ul img,
+.ds-wp-settings-api-panel-wrap ol img  {
   padding: 20px;
   display: block;
 }
@@ -239,7 +239,7 @@
 .ds-wp-settings-api-admin-panel-wrap .button-primary:hover,
 .wp-core-ui .ds-wp-settings-api-admin-panel-wrap .button-primary.hover,
 .ds-wp-settings-api-admin-panel-wrap input[type="submit"]:hover {
-  background: #17bd9a;
+  background: #0c7d65;
 }
 .ds-wp-settings-api-admin-panel-wrap button:focus,
 .ds-wp-settings-api-admin-panel-wrap .button-primary:focus,
@@ -266,7 +266,7 @@
   font-size: 12px;
   right: 10px;
 }
-.ds-wp-settings-api-plugin-panel-wrap .ds-wp-api-input.ds-wp-api-input-required {
+.ds-wp-settings-api-panel-wrap .ds-wp-api-input.ds-wp-api-input-required {
   border: 2px solid red;
 }
 .ds-wp-settings-api-admin-panel .ds-wp-api-input.fontawesome-picker {
@@ -284,15 +284,15 @@
 }
 
 /* INPUTS */
-.ds-wp-settings-api-plugin-panel-wrap input[type="text"],
-.ds-wp-settings-api-plugin-panel-wrap input[type="number"],
-.ds-wp-settings-api-plugin-panel-wrap input[type="password"],
-.ds-wp-settings-api-plugin-panel-wrap textarea {
+.ds-wp-settings-api-panel-wrap input[type="text"],
+.ds-wp-settings-api-panel-wrap input[type="number"],
+.ds-wp-settings-api-panel-wrap input[type="password"],
+.ds-wp-settings-api-panel-wrap textarea {
   margin-left: 0;
     border-radius: 4px;
     border: none;
     box-shadow: none;
-    background: #F1F5F9;
+    background: #f1f1f1;
     padding: 13px;
     font-size: 14px;
     color: #32373C;
@@ -306,20 +306,20 @@
     -moz-transition: background .5s;
     transition: background .5s;
 }
-.ds-wp-settings-api-plugin-panel-wrap input[type="text"]:focus,
-.ds-wp-settings-api-plugin-panel-wrap input[type="number"]:focus,
-.ds-wp-settings-api-plugin-panel-wrap input[type="password"]:focus,
-.ds-wp-settings-api-plugin-panel-wrap textarea:focus {
-  background: #E0E5EA;
+.ds-wp-settings-api-panel-wrap input[type="text"]:focus,
+.ds-wp-settings-api-panel-wrap input[type="number"]:focus,
+.ds-wp-settings-api-panel-wrap input[type="password"]:focus,
+.ds-wp-settings-api-panel-wrap textarea:focus {
+  background: #dedede;
 }
-.ds-wp-settings-api-plugin-panel-wrap select {
+.ds-wp-settings-api-panel-wrap select {
   width: 55%;
   height: 39px;
   margin-left: 0;
   border-radius: 4px;
   border: none;
   box-shadow: none;
-  background: #F1F5F9;
+  background: #f1f1f1;
   padding: 10px 13px;
   font-size: 14px;
   color: #32373C;
@@ -426,7 +426,7 @@
   width: 150px;
   height: 40px;
   border-radius: 3px;
-  background-color: #004e93;
+  background-color: #0f5779;
   background-image: linear-gradient(top, #004e93, #003c71);
   -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 0 2px rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 0 2px rgba(0, 0, 0, 0.2);

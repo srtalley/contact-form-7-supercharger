@@ -1,6 +1,6 @@
 <?php
 // GitHub: https://github.com/srtalley/dustysun-wp-settings-api
-// Version 1.1.9
+// Version 2.0
 // Author: Steve Talley
 // Organization: Dusty Sun
 // Author URL: https://dustysun.com/
@@ -11,12 +11,13 @@
 // Include the admin panel page
 // https://github.com/kmhcreative/icon-picker
 
-namespace DustySun\WP_Settings_API\v1_2;
+namespace DustySun\WP_Settings_API\v2;
 /* To use this library, create a new class object and pass the complete path and name of a JSON file, or place a JSON file named ds_wp_settings_api.json in the same directory as this file.
 
 You should also have a views directory in the same directory as this file, and any PHP files that have the same name as the section will be displayed on those tabs.
 
-The main plugin info shown above the tab is called "pluginsettings.php" while the rest of the files are named after the id of the about_sections or options sections.
+The main info shown above the tab but below the title can be defined with a file named 
+"main_settings.php" while the rest of the files are named after the id of the about_sections or options sections.
 
 Example instatiation:
 $ds_api_settings = array(
@@ -29,7 +30,7 @@ $ds_settings_page = new \Dusty_Sun\WP_Settings_API\v1\DustySun_WP_Settings_API($
 
 */
 
-if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class SettingsBuilder {
+if(!class_exists('DustySun\WP_Settings_API\v2\SettingsBuilder'))  { class SettingsBuilder {
 	
 	private $ds_wp_api_settings_init_data;
 
@@ -37,9 +38,9 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 	private $ds_wp_settings_api_full_config = array();
 
-	private $plugin_settings = array();
+	private $main_settings = array();
 
-	private $ds_wp_settings_api_fields = array();
+	private $ds_wp_settings_option_fields = array();
 
 	private $current_settings = array();
 
@@ -54,14 +55,14 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 		// Read the JSON file with the settings that makes everything work
 		$this->read_json_file($this->ds_wp_api_settings_init_data['json_file']);
-
-		// Set plugin defaults
-		$this->set_plugin_options();
+		
+		// Set item defaults
+		$this->set_main_settings();
 
 		// Register the settings if true - if we're building an options page
 		if ($this->ds_wp_api_settings_init_data['register_settings']) add_action( 'admin_init', array( $this, 'build_settings' ) );
 
-		add_action('wp_ajax_ds_wp_api_reset_settings', array($this, 'ds_wp_api_reset_settings'));
+		add_action('wp_ajax_ds_wp_api_reset_settings-' . $this->main_settings['item_slug'], array($this, 'ds_wp_api_reset_settings'));
 
 	} // end public function __construct()
 
@@ -79,7 +80,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 	public function read_json_file($file_name){
 
 		if(!$file_name) {
-			//see if there's a json file in the same directory with the same name as this file
+			//see if there's a json file in the same directory with the same name as this file - only works with plugins 
 			$file_name = plugin_dir_path(__FILE__) . basename(__FILE__, '.php') . '.json';
 		} // end if(!$file_name)
 
@@ -87,85 +88,98 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 		if(file_exists($file_name)) {
 
 			ob_start();
-			include( $file_name);
+			include( $file_name );
 			$this->ds_wp_settings_api_full_config = json_decode(ob_get_clean(), true);
-			$this->ds_wp_settings_api_fields = $this->ds_wp_settings_api_full_config['options'];
+
+			// see if there are options fields 
+			if(isset($this->ds_wp_settings_api_full_config['options']) && $this->ds_wp_settings_api_full_config['options'] != '') {
+				$this->ds_wp_settings_option_fields = $this->ds_wp_settings_api_full_config['options'];
+			} else {
+				$this->ds_wp_settings_option_fields = false;
+			} //end if
+			
 
 		} else {
-			wp_die('<h2>' . basename(__FILE__) . ' ERROR:</h2> <p>No JSON file was passed when initializing the settings class. Either pass a file name when constructing it or place a file with the same name as this class but with .json at the end in order to successfully initialize this class.</p> <p><strong>' . plugins_url(plugin_basename(__FILE__)) . '</strong></p>');
+			wp_die('<h2>' . basename(__FILE__) . ' ERROR:</h2> <p>No JSON file was passed when initializing the settings class. Either pass a file name when constructing it or place a file with the same name as this class but with .json at the end in order to successfully initialize this class.</p> <p><strong>' . dirname(__FILE__) . '</strong></p>');
 		}//end if(file_exists($file_path))
 
 	} // end function read_json_file
 
-	public function set_plugin_options($update_db = false, $reset_defaults = false) {
+	public function set_main_settings($update_db = false, $reset_defaults = false) {
 
-		// if $update_db is true the plugin settings key can optionally be stored in
-		// the database. This is useful for recording this info on plugin activation.
-		// the $reset_defaults flag will clear any existing values
+		// if $update_db is true the main settings key can optionally be stored in
+		// the database. This is useful for recording this info on plugin or theme 
+		// activation. The $reset_defaults flag will clear any existing values from 
+		// the database.
 
-		$this->plugin_settings = $this->ds_wp_settings_api_full_config['plugin_settings'];
+		$this->main_settings = $this->ds_wp_settings_api_full_config['main_settings'];
 
-		// set default options for the plugins which can be overridden by the JSON file
-		$ds_default_plugin_options = array(
-			'plugin_domain' => plugin_basename( __DIR__ ),
+		// set default options which can be overridden by the JSON file
+		$ds_default_main_settings = array(
+			'text_domain' => 'ds_wp_settings_api',
 			'tabs' => 'true',
-			'options_suffix' => '_options',
+			'options_suffix' => '',
 			'page_suffix' => '_page',
 			'author' => '',
 			'author_uri' => '',
-			'plugin_name' => 'Plugin',
-			'plugin_uri' => '',
+			'item_name' => 'Untitled',
+			'item_uri' => '',
 			'page_hook' => '',
 			'page_slug' => '',
-			'plugin_slug' => '',
+			'item_slug' => '',
 			'support_uri' => '',
 			'support_email' => '',
 			'version' => '',
 		);
 
 		// Go through the options that were set in the JSON config file and overwrite
-		// any of the defaults above if so. Then set the plugin_settings variable
-		foreach($ds_default_plugin_options as $ds_default_plugin_option_key => $ds_default_plugin_option) {
-			if(!isset($this->plugin_settings[$ds_default_plugin_option_key]) || $this->plugin_settings[$ds_default_plugin_option_key] == '') {
-				$this->plugin_settings[$ds_default_plugin_option_key] = $ds_default_plugin_option;
+		// any of the defaults above if so. Then set the main_settings variable
+		foreach($ds_default_main_settings as $ds_default_main_settings_key => $ds_default_main_setting) {
+			if(!isset($this->main_settings[$ds_default_main_settings_key]) || $this->main_settings[$ds_default_main_settings_key] == '') {
+				$this->main_settings[$ds_default_main_settings_key] = $ds_default_main_setting;
 			} // end if
 		} // end foreach
 
-		// set the plugin_slug key to the page_slug key if plugin_slug is not set
-		if($this->plugin_settings['plugin_slug'] == '') {
-			$this->plugin_settings['plugin_slug'] = $this->plugin_settings['page_slug'];
-		} // end if($this->plugin_settings['plugin_slug'] == '')
+		// set the item_slug key to the page_slug key if item_slug is not set
+		if($this->main_settings['item_slug'] == '') {
+			$this->main_settings['item_slug'] = $this->main_settings['page_slug'];
+		} // end if($this->main_settings['item_slug'] == '')
 
 		// now check for an existing unique ID which we store in a separate key
-		$ds_plugin_settings_unique_id_key = $this->plugin_settings['plugin_domain'] . '_uid';
+		$ds_main_settings_unique_id_key = $this->main_settings['text_domain'] . '_uid';
 
 		// see if the option is set. If not, return blank
-		$this->plugin_settings['unique_id'] = get_option($ds_plugin_settings_unique_id_key, '');
+		$this->main_settings['unique_id'] = get_option($ds_main_settings_unique_id_key, '');
 
 		// update the current settings
 		$this->current_settings = $this->set_current_settings();
 
 		// only do the following as admin, such as adding views that don't need to be done
-		// every time the plugin is accessed by a regular user
+		// every time the site is accessed by a regular user
 		if(is_admin()) {
 
 			// Get the views
 			$this->ds_wp_settings_api_full_config = $this->read_stored_views( $this->ds_wp_settings_api_full_config ); 
 
-			// Get the views for main plugin settings screen
-			$this->plugin_settings['info'] = $this->ds_wp_settings_api_full_config['plugin_settings']['info'];
+			// Get the views for main settings screen
+			$this->main_settings['info'] = $this->ds_wp_settings_api_full_config['main_settings']['info'];
 			
 			// Get the views for any option/field tabs
-			$this->ds_wp_settings_api_fields = $this->ds_wp_settings_api_full_config['options'] ;
+			// $this->ds_wp_settings_option_fields = $this->ds_wp_settings_api_full_config['options'] ;
 
 			// Get the views for any about section tabs
-			$this->ds_wp_settings_api_about_sections = $this->ds_wp_settings_api_full_config['about_sections'];
+			// see if there are about sections 
+			if(isset($this->ds_wp_settings_api_full_config['about_sections']) && $this->ds_wp_settings_api_full_config['about_sections'] != '') {
+				$this->ds_wp_settings_api_about_sections = $this->ds_wp_settings_api_full_config['about_sections'];
+			} else {
+				$this->ds_wp_settings_api_about_sections = false;
+			} // end if
 
 			// Check to see if the unique ID is properly stored in the DB.
 			// if it's blank set a new id and put it in the DB
-			if($this->plugin_settings['unique_id'] == ''){
-				$this->plugin_settings['unique_id'] = $this->ds_wp_settings_api_random_string();
-				update_option($ds_plugin_settings_unique_id_key, $this->plugin_settings['unique_id']);
+			if($this->main_settings['unique_id'] == ''){
+				$this->main_settings['unique_id'] = $this->ds_wp_settings_api_random_string();
+				update_option($ds_main_settings_unique_id_key, $this->main_settings['unique_id']);
 			} // end if
 
 			// Register admin scripts
@@ -174,23 +188,23 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 			// check if the reset_defaults flag was set and clear the existing options if so
 			// set the ds_wp_settings_api_messages value for another function to use
 			if($reset_defaults) {
-				$delete_plugin_settings = delete_option($this->plugin_settings['plugin_domain'] . '_plugin_settings');
+				$delete_main_settings = delete_option($this->main_settings['text_domain'] . '_main_settings');
 
-				if($delete_plugin_settings){
-					$this->ds_wp_settings_api_messages[] = 'Deleted ' . $this->plugin_settings['plugin_domain'] . '_plugin_settings';
+				if($delete_main_settings){
+					$this->ds_wp_settings_api_messages[] = 'Deleted ' . $this->main_settings['text_domain'] . '_main_settings';
 				} else {
-					$this->ds_wp_settings_api_messages[] = $this->plugin_settings['plugin_domain'] . '_plugin_settings' . ' was not set so it was not deleted.';
-				} //end if($delete_plugin_settings){
+					$this->ds_wp_settings_api_messages[] = $this->main_settings['text_domain'] . '_main_settings' . ' was not set so it was not deleted.';
+				} //end if($delete_main_settings){
 			} //end if($reset_defaults)
 
 			// check if the update flag was set. If so set the options except for
 			// the info key
 			if($update_db) {
 
-				$ds_wp_settings_api_plugin_settings_except_views = $this->plugin_settings;
-				$ds_wp_settings_api_plugin_settings_except_views['info'] = '';
+				$ds_wp_settings_api_main_settings_except_views = $this->main_settings;
+				$ds_wp_settings_api_main_settings_except_views['info'] = '';
 
-				update_option($this->plugin_settings['plugin_domain'] . '_plugin_settings', $ds_wp_settings_api_plugin_settings_except_views);
+				update_option($this->main_settings['text_domain'] . '_main_settings', $ds_wp_settings_api_main_settings_except_views);
 
 			} // end update_db
 
@@ -201,15 +215,12 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 		// check to see if the hook is the same as what was defined in the config
 		// Tip: get the hook by assigning the add_options_page function to a
 		// variable.
-		if($hook == $this->plugin_settings['page_hook']) {
+		if($hook == $this->main_settings['page_hook']) {
 
 			// Google fonts
 			wp_enqueue_style('ds-wp-google-fonts-open-sans', 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700');
 
 			wp_enqueue_style('ds-wp-google-fonts-montserrat', 'https://fonts.googleapis.com/css?family=Montserrat:300,400,600,700');
-
-			// Plugin panel CSS
-			wp_enqueue_style('ds-wp-settings-api', plugins_url('/css/ds-wp-settings-api-admin.css', __FILE__));
 
 			// Add the color picker css file
 			wp_enqueue_style( 'wp-color-picker' );
@@ -218,26 +229,31 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 			wp_register_style('ds-wp-settings-api-fontawesome', 'https://use.fontawesome.com/releases/v5.1.1/css/all.css', '5.1.1');
 			wp_enqueue_style('ds-wp-settings-api-fontawesome');
 
-			wp_register_style('ds-wp-settings-api-fontawesome-iconpicker', plugins_url('/css/fontawesome-iconpicker.min.css', __FILE__));
+			// Plugin panel CSS
+			wp_enqueue_style('ds-wp-settings-api', $this->get_file_url('/css/ds-wp-settings-api-admin.css'));
+
+			// Font Awesome Picker CSS
+			wp_register_style('ds-wp-settings-api-fontawesome-iconpicker', $this->get_file_url('/css/fontawesome-iconpicker.min.css'));
 			wp_enqueue_style('ds-wp-settings-api-fontawesome-iconpicker');
 
-			wp_register_script('ds-wp-settings-api-fontawesome-iconpicker', plugins_url('/js/fontawesome-iconpicker.min.js', __FILE__));
+			// Font Awesome Picker JS
+			wp_register_script('ds-wp-settings-api-fontawesome-iconpicker', $this->get_file_url('/js/fontawesome-iconpicker.min.js'));
 			wp_enqueue_script('ds-wp-settings-api-fontawesome-iconpicker');
 
 			// Load the JS that adds the color picker
-			wp_enqueue_script( 'ds-wp-settings-api-admin', plugins_url( '/js/ds-wp-settings-api-admin.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
+			wp_enqueue_script( 'ds-wp-settings-api-admin', $this->get_file_url( '/js/ds-wp-settings-api-admin.js'), array( 'wp-color-picker' ), false, true );
 
-		} // end if($hook == $this->plugin_settings['page_hook'])
+		} // end if($hook == $this->main_settings['page_hook'])
 
-  } // end public function register_ds_ucfml_admin_styles_scripts
-
-	public function get_plugin_options() {
-		return $this->plugin_settings;
-	} // end function get_plugin_options
+	} // end public function register_ds_ucfml_admin_styles_scripts
+		
+	public function get_main_settings() {
+		return $this->main_settings;
+	} // end function get_item_options
 
 	public function get_current_settings() {
 		return $this->current_settings;
-	} // end function get_plugin_options
+	} // end function get_current_settings
 
 	public function ds_wp_api_reset_settings() {
 
@@ -249,8 +265,8 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 		$reset_messages = 'Attempting to reset all settings.';
 
-		// delete stored plugin settings
-		$this->set_plugin_options($update_db = $update_db_choice, $reset_defaults = true);
+		// delete stored settings
+		$this->set_main_settings($update_db = $update_db_choice, $reset_defaults = true);
 
 		// delete the settings fields
 		$this->set_current_settings($update_db = $update_db_choice, $reset_defaults = true);
@@ -272,11 +288,11 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 	public function get_reset_ajax_form() {
 
 		$reset_html = '<h2>RESET ALL SETTINGS</h2>
-		  <h4>Caution: This will reset all plugin settings to default values.</h4>
+		  <h4>Caution: This will reset all settings to default values.</h4>
 
-		  <form id="ds-wp-settings-reset" action="#" method="POST">
+		  <form id="ds-wp-settings-reset" action="#" method="POST" data-item-slug="' . $this->main_settings['item_slug'] . '">
 		    <div class="ds-wp-settings-api-ajax-form">
-						<div class="ds-wp-settings-api-ajax-form-row"><label><input type="checkbox" id="ds_wp_settings_api_remove_data" name="ds_wp_settings_api_remove_data" value="true">Delete ALL plugin data (only use if you plan to delete the plugin as well).</label></div>
+						<div class="ds-wp-settings-api-ajax-form-row"><label><input type="checkbox" id="ds_wp_settings_api_remove_data" name="ds_wp_settings_api_remove_data" value="true">Delete ALL settings data from database, too.</label></div>
 		        <div class="ds-wp-settings-api-ajax-form-row"><input type="submit" value="Reset All Settings" /></div>
 		    </div>
 		  </form>
@@ -288,63 +304,60 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 
 	/* Create the actual options page */
-	// pass a title, header content and about sections. If you don't, then the header content will be loaded from the "plugin_settings" key along with the content from any file named plugin_settings.php that is placed in the views directory
+	// pass a title, header content and about sections. If you don't, then the header content will be loaded from the "main_settings" key along with the content from any file named main_settings.php that is placed in the views directory
 
 	// if there's a logo_file key specified with a path relative to this library it will be shown in the header bar 
 	
-	public function build_plugin_panel($title = 'Title', $header_content = null, $about_sections = null){
+	public function build_settings_panel($title = null, $header_content = null){
 
-		if($header_content == null) $header_content = $this->plugin_settings['info'];
+		if($title == null) $title = $this->main_settings['name'];
+		if($header_content == null) $header_content = $this->main_settings['info'];
 		if ( !current_user_can( 'manage_options' ) )  {
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 		}
 			echo settings_errors();
 		?>
-		<div id="<?php echo $this->plugin_settings['page_hook'];?>" class="ds-wp-settings-api-plugin-panel-wrap">
+		<div id="<?php echo $this->main_settings['page_hook'];?>" class="ds-wp-settings-api-panel-wrap">
 			<div class="ds-wp-settings-api-admin-title">
 				<h1><?php echo $title; ?></h1>
 				<?php
 				// check if the image file is set
-				if(isset($this->plugin_settings['logo_file']) && $this->plugin_settings['logo_file'] != null) {
+				if(isset($this->main_settings['logo_file']) && $this->main_settings['logo_file'] != null) {
 					?>
-					<img id="ds-wp-settings-logo" src="<?php echo  plugins_url( $this->plugin_settings['logo_file'], __FILE__);?>">
+					<img id="ds-wp-settings-logo" src="<?php echo  plugins_url( $this->main_settings['logo_file'], __FILE__);?>">
 					<?php
 				}
 				?>
 			</div>
 			<div class="ds-wp-settings-api-inner-wrap">
-				<div class="ds-wp-settings-api-header">
-					<?php echo $header_content; ?>
-				</div> <!--ds-wp-settings-api-header-->
+				<?php if($header_content != '') { ?>
 
-			<div class="ds-wp-settings-api-admin-panel-wrap">
-				<?php	// add the actual form
-				$this->build_options_form($about_sections); ?>
-
-			</div><!--ds-wp-settings-api-inner-wrap-->
+					<div class="ds-wp-settings-api-header">
+						<?php echo $header_content; ?>
+					</div> <!--ds-wp-settings-api-header-->
+						
+				<?php } ?>
+			
+			<?php
+			$this->build_options_form(); ?>
+			
 			<div class="ds-wp-settings-api-attribution">
-				<span class="ds-wp-settings-api-plugin-home"><a href="<?php echo $this->plugin_settings['plugin_uri'];?>">Plugin Homepage</a></span>
-				<span class="ds-wp-settings-api-plugin-version">Version <?php echo $this->plugin_settings['version'];?> by <a href="<?php echo $this->plugin_settings['author_uri'];?>"><?php echo $this->plugin_settings['author'];?></a></span>
+				<span class="ds-wp-settings-api-item-home"><a href="<?php echo $this->main_settings['item_uri'];?>"><?php echo $this->main_settings['name'];?></a></span>
+				<span class="ds-wp-settings-api-item-version">Version <?php echo $this->main_settings['version'];?> by <a href="<?php echo $this->main_settings['author_uri'];?>"><?php echo $this->main_settings['author'];?></a></span>
 			</div><!--ds-wp-settings-api-attribution-->
 		</div><!--ds-wp-settings-api-inner-wrap-->
-	</div> <!--ds-wp-settings-api-plugin-panel-wrap-->
+	</div> <!--ds-wp-settings-api-panel-wrap-->
 
 	<?php
-	} // end function build_plugin_panel
-	public function build_options_form($about_sections = null) {
-			// get the about_sections variable and mesh anything with info from the JSON file
-			if(isset($about_sections) && is_array($about_sections)) {
-				foreach($about_sections as $about_section_key => $about_section) {
-					foreach($about_section as $about_section_item_key => $about_section_item) {
-						 $this->ds_wp_settings_api_about_sections[$about_section_key][$about_section_item_key] = $about_section_item;
-					} // end foreach
-				} // end foreach
-			} // end if
-
-			$tabs = $this->plugin_settings['tabs'];
+	} // end function build_settings_panel
+	public function build_options_form() {
+		
+		if($this->ds_wp_settings_option_fields || $this->ds_wp_settings_api_about_sections) { ?>
+			<div class="ds-wp-settings-api-admin-panel-wrap">
+		<?php
+			$tabs = $this->main_settings['tabs'];
 			// See if tabs should be created and if so, create them
-			// see how many sections are in the array
-			$ds_wp_settings_api_section_count = count($this->ds_wp_settings_api_fields);
+
 			if($tabs == "true") {
 				// build tabs
 				?>
@@ -365,14 +378,18 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 						// Combine into an array since we have settings or about sections that
 						// can be tabs. Add them to an array and add a key to mark what they are
 						
-						foreach($this->ds_wp_settings_api_fields as $option_key => $option_array) {
-							$option_array['type'] = 'option';
-							$ds_wp_settings_api_tab_array[$option_key] = $option_array;
-						}
-						foreach($this->ds_wp_settings_api_about_sections as $about_section_key => $about_section_array) {
-							$about_section_array['type'] = 'about_section';
-							$ds_wp_settings_api_tab_array[$about_section_key] = $about_section_array;
-						}
+						if($this->ds_wp_settings_option_fields) {						
+							foreach($this->ds_wp_settings_option_fields as $option_key => $option_array) {
+								$option_array['type'] = 'option';
+								$ds_wp_settings_api_tab_array[$option_key] = $option_array;
+							} // end foreach 
+						} // end if
+						if($this->ds_wp_settings_api_about_sections) {
+							foreach($this->ds_wp_settings_api_about_sections as $about_section_key => $about_section_array) {
+								$about_section_array['type'] = 'about_section';
+								$ds_wp_settings_api_tab_array[$about_section_key] = $about_section_array;
+							} // end foreach 
+						} // end if
 
 						// loop through the combined array to create tabs
 						foreach($ds_wp_settings_api_tab_array as $ds_wp_settings_api_section_key => $ds_wp_settings_api_section) {
@@ -391,7 +408,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 								$tab_label = 'Option ' . $ds_wp_settings_api_section_loop_counter;
 							}
 							?>
-							<a href="<?php menu_page_url($this->plugin_settings['page_slug']);?>&tab=<?php echo $ds_wp_settings_api_section_slug; ?>" class="nav-tab <?php if($active_tab == $ds_wp_settings_api_section_slug){echo 'nav-tab-active';} ?> "><?php _e($tab_label, 'sandbox'); ?></a>
+							<a href="<?php menu_page_url($this->main_settings['page_slug']);?>&tab=<?php echo $ds_wp_settings_api_section_slug; ?>" class="nav-tab <?php if($active_tab == $ds_wp_settings_api_section_slug){echo 'nav-tab-active';} ?> "><?php _e($tab_label, 'sandbox'); ?></a>
 
 							<?php
 							$ds_wp_settings_api_section_loop_counter++;
@@ -411,7 +428,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 							// do the form  ?>
 
 							<form action="options.php" method="POST" id="<?php echo $active_tab;?>"> <?php
-							$current_settings_page = $active_tab . $this->plugin_settings['page_suffix'];
+							$current_settings_page = $active_tab . $this->main_settings['page_suffix'];
 							settings_fields ( $current_settings_page  );
 							do_settings_sections( $current_settings_page );
 							submit_button(); ?>
@@ -430,29 +447,35 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 					} else {
 						// All of our settings are on one page instead of tabs
-						// do the form  ?>
+						// do the form  
+						if($this->ds_wp_settings_option_fields) {?>
 
 						<form action="options.php" method="POST"> <?php
-							settings_fields ( $this->plugin_settings['plugin_domain'] );
+							settings_fields ( $this->main_settings['text_domain'] );
 							// get each option section
-							foreach($this->ds_wp_settings_api_fields as $ds_wp_settings_api_section_key => $ds_wp_settings_api_section) {
-								$current_settings_page = $ds_wp_settings_api_section_key . $this->plugin_settings['page_suffix'];
+							foreach($this->ds_wp_settings_option_fields as $ds_wp_settings_api_section_key => $ds_wp_settings_api_section) {
+								$current_settings_page = $ds_wp_settings_api_section_key . $this->main_settings['page_suffix'];
 								do_settings_sections( $current_settings_page );
 							} // end foreach
 							submit_button(); ?>
 						</form>
 					<?php
+						} // end if
+
 						// get all about sections
-						foreach($this->ds_wp_settings_api_about_sections as $ds_wp_settings_api_about_key => $ds_wp_settings_api_about_section) {
-							echo '<h2>' . $ds_wp_settings_api_about_section['title'] . '</h2>';
-							echo $ds_wp_settings_api_about_section['info'];
-						} // end foreach
-					}
+						if($this->ds_wp_settings_api_about_sections) {
+							foreach($this->ds_wp_settings_api_about_sections as $ds_wp_settings_api_about_key => $ds_wp_settings_api_about_section) {
+								echo '<h2>' . $ds_wp_settings_api_about_section['title'] . '</h2>';
+								echo $ds_wp_settings_api_about_section['info'];
+							} // end foreach
+						} // end if
+
+					} // end if tabs == true
 					?>
-				</div><!--ds-wp-settings-api-admin-panel-->
-
-	<?php
-
+				</div><!--ds-wp-settings-api-admin-panel-->				
+			</div><!--ds-wp-settings-api-inner-wrap-->
+			<?php 
+		} // end if
 	} // end function ds_wp_settings_api_menu_options
 
 	public function set_current_settings($update_db = false, $reset_defaults = false) {
@@ -461,11 +484,12 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 		// to the db. If the $update_db flag is set the values will be saved
 		// to the database. $reset_defaults will delete the existing keys and
 		// insert default settings
+		if ($this->ds_wp_settings_option_fields) {
 
 		// get the various fields from the array
-		foreach($this->ds_wp_settings_api_fields as $ds_settings_key => $ds_default_settings_fields) {
+		foreach($this->ds_wp_settings_option_fields as $ds_settings_key => $ds_default_settings_fields) {
 			// set the option name used in the db and fields
-			$ds_settings_option_name = $ds_settings_key . $this->plugin_settings['options_suffix'];
+			$ds_settings_option_name = $ds_settings_key . $this->main_settings['options_suffix'];
 
 			// first fill our options array with all default values
 			foreach($ds_default_settings_fields['fields'] as $ds_default_setting_field){
@@ -497,7 +521,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 						$this->ds_wp_settings_api_messages[] = 'Deleted ' . $ds_settings_option_name;
 					} else {
 						$this->ds_wp_settings_api_messages[] = $ds_settings_option_name . ' was not set so it was not deleted.';
-					} //end if($delete_plugin_settings)
+					} //end if($delete_main_settings)
 			} //end if($reset_defaults)
 
 			// now get the options set in the db
@@ -526,6 +550,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 		} // end update_db
 		// return the array
 		return $ds_wp_settings_values;
+		} // end if
 
 	} // end function set_current_settings
 
@@ -547,12 +572,12 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 	public function encrypt_data($input, $password = null) {
 		// adapted from https://stackoverflow.com/questions/3422759/php-aes-encrypt-decrypt/46872528#46872528
 
-		// if the unique ID isn't set for whatever reason use the unique ID in our plugin settings
+		// if the unique ID isn't set for whatever reason use the unique ID in our settings
 		if(!$password){
 
-			if(isset($this->plugin_settings['unique_id']) && $this->plugin_settings['unique_id'] != '') {
-				// use the unique ID that was added when the plugin was created
-				$password = $this->plugin_settings['unique_id'];
+			if(isset($this->main_settings['unique_id']) && $this->main_settings['unique_id'] != '') {
+				// use the unique ID that was added when the item was created
+				$password = $this->main_settings['unique_id'];
 			} else {
 				$password = 'testing_purposes_only';
 			}
@@ -574,12 +599,12 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 	} // end function encrypt_data
 
 	public function decrypt_data($encoded_input, $password = null) {
-		// if the unique ID isn't set for whatever reason use the unique ID in our plugin settings
+		// if the unique ID isn't set for whatever reason use the unique ID in our settings
 		if(!$password){
 
-			if(isset($this->plugin_settings['unique_id']) && $this->plugin_settings['unique_id'] != '') {
-				// use the unique ID that was added when the plugin was created
-				$password = $this->plugin_settings['unique_id'];
+			if(isset($this->main_settings['unique_id']) && $this->main_settings['unique_id'] != '') {
+				// use the unique ID that was added when the item was created
+				$password = $this->main_settings['unique_id'];
 			} else {
 				$password = 'testing_purposes_only';
 			}
@@ -605,13 +630,12 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 	} // end function encrypt_data
 
-	// Checks for php files to read into the info key for the plugin_settings key
+	// Checks for php files to read into the info key for the main_settings key
 	// and each option under options and about_sections keys
 	public function read_stored_views($ds_wp_settings_api_key) {
 
-		// foreach ($this->ds_wp_settings_api_about_sections as $about_section_key => $about_section) {
 		foreach ($ds_wp_settings_api_key as $section_key => $section) {
-			if($section_key == 'plugin_settings') {
+			if($section_key == 'main_settings') {
 				if(!isset($section['info']) || $section['info'] == '') {
 					// Set our directory name for views
 					$ds_wp_settings_api_key[$section_key]['info'] = $this->ds_wp_settings_api_import_view($section_key);
@@ -656,13 +680,14 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 	/* Register the various settings */
 	public function build_settings() {
 
-		foreach ($this->ds_wp_settings_api_fields as $ds_wp_settings_api_setting_id => $ds_wp_settings_api_field_setting) {
+		if($this->ds_wp_settings_option_fields) {
+		foreach ($this->ds_wp_settings_option_fields as $ds_wp_settings_api_setting_id => $ds_wp_settings_api_field_setting) {
 
 			// create the name for our options key
-			$ds_wp_settings_api_option_name = $ds_wp_settings_api_setting_id . $this->plugin_settings['options_suffix'];
+			$ds_wp_settings_api_option_name = $ds_wp_settings_api_setting_id . $this->main_settings['options_suffix'];
 
 			// create the page name
-			$ds_wp_settings_api_option_page = $ds_wp_settings_api_setting_id . $this->plugin_settings['page_suffix'];
+			$ds_wp_settings_api_option_page = $ds_wp_settings_api_setting_id . $this->main_settings['page_suffix'];
 
 			// get the section title
 			$ds_wp_settings_api_settings_section_title = isset($ds_wp_settings_api_field_setting['title']) && !empty($ds_wp_settings_api_field_setting['title']) ? $ds_wp_settings_api_field_setting['title'] : '';
@@ -679,13 +704,13 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 			);
 
 			// create the option group name - use the same as page name if tabs
-			// and use the plugin domain if not tabs
-			$tabs = $this->plugin_settings['tabs'];
+			// and use the text domain if not tabs
+			$tabs = $this->main_settings['tabs'];
 			if($tabs == "true") {
 				$ds_wp_settings_api_option_group = $ds_wp_settings_api_option_page;
 			} else {
-				// use the plugin domain for the page name
-				$ds_wp_settings_api_option_group = $this->plugin_settings['plugin_domain'];
+				// use the text domain for the page name
+				$ds_wp_settings_api_option_group = $this->main_settings['text_domain'];
 			}
 
 			// register the settings
@@ -698,7 +723,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 
 				add_settings_field(
 					$ds_wp_settings_api_field_setting['id'], // String for use in the 'id' attribute of tags.
-					__($ds_wp_settings_api_field_setting['label'], $this->plugin_settings['plugin_domain']), // Title of the field.
+					__($ds_wp_settings_api_field_setting['label'], $this->main_settings['text_domain']), // Title of the field.
 					array($this, 'ds_wp_settings_api_create_settings_field_callback'), // callback
 					$ds_wp_settings_api_option_page, // Page.  The menu page on which to display this field.
 					$ds_wp_settings_api_setting_id, // The section of the settings page (added via add_settings_section)
@@ -710,6 +735,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 				);
 			} // nested foreach
 		} // end foreach
+		} // end if 
 	} // end public function ds_wp_settings_api_register_settings
 
 	public function ds_wp_settings_api_create_settings_field_callback($args){
@@ -883,11 +909,11 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 	// create the settings page
 	public function ds_wp_settings_api_create_settings_section_callback($args) {
 		// set the info text if it exists
-		$info_text = isset($this->ds_wp_settings_api_fields[$args['id']]['info']) && !empty($this->ds_wp_settings_api_fields[$args['id']]['info']) ? $this->ds_wp_settings_api_fields[$args['id']]['info'] : '';
+		$info_text = isset($this->ds_wp_settings_option_fields[$args['id']]['info']) && !empty($this->ds_wp_settings_option_fields[$args['id']]['info']) ? $this->ds_wp_settings_option_fields[$args['id']]['info'] : '';
 		$section_callback = $info_text;
 		echo '<div class="ds-wp-settings-api-info-text">' . $info_text . '</div>';
 		// Add a hidden field for our sanitizer that has the options key name
-		echo '<input type="hidden" name="' . $args['id'] . $this->plugin_settings['options_suffix'] .  '[ds_wp_settings_api_option_key]" value="'. $args['id'] . '" />';
+		echo '<input type="hidden" name="' . $args['id'] . $this->main_settings['options_suffix'] .  '[ds_wp_settings_api_option_key]" value="'. $args['id'] . '" />';
 	} // end function
 
 	function endsWith($needle, $haystack) {
@@ -911,7 +937,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 			foreach($_POST as $post_key => $post_value) {
 
 				//use our function to check if the POST key ends with our option key name and use it if so
-				$endsWith = $this->endsWith( $this->plugin_settings['options_suffix'],$post_key);
+				$endsWith = $this->endsWith( $this->main_settings['options_suffix'],$post_key);
 
 				if($endsWith) {
 					$option_key = isset($_POST[$post_key]['ds_wp_settings_api_option_key']) && !empty($_POST[$post_key]['ds_wp_settings_api_option_key']) ? $_POST[$post_key]['ds_wp_settings_api_option_key'] : '';
@@ -920,7 +946,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 		}//end if
 
 		// get the saniziation type
-		$sanitization_fields = isset($this->ds_wp_settings_api_fields[$option_key]['fields']) && !empty($this->ds_wp_settings_api_fields[$option_key]['fields']) ? $this->ds_wp_settings_api_fields[$option_key]['fields'] : '';
+		$sanitization_fields = isset($this->ds_wp_settings_option_fields[$option_key]['fields']) && !empty($this->ds_wp_settings_option_fields[$option_key]['fields']) ? $this->ds_wp_settings_option_fields[$option_key]['fields'] : '';
 
 		//work around issue if this sanitization is called without any field data
 		if($sanitization_fields == '') {
@@ -956,7 +982,7 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 					// check if the encoded string is what's already in the db. if so
 					// don't encrypt it again. Have to get the current settings plus and also
 					// add the options suffix - this is a long and hard to read string
-					else if($raw_input_data_fields[$sanitization_field['id']] == $this->current_settings[$option_key . $this->plugin_settings['options_suffix']][$sanitization_field['id']]) {
+					else if($raw_input_data_fields[$sanitization_field['id']] == $this->current_settings[$option_key . $this->main_settings['options_suffix']][$sanitization_field['id']]) {
 						$validated_info = $raw_input_data_fields[$sanitization_field['id']];
 					}
 					else {
@@ -1018,4 +1044,37 @@ if(!class_exists('DustySun\WP_Settings_API\v1_2\SettingsBuilder'))  { class Sett
 			'error ' . $field_id // class for the error
 		);
 	} // end function create_settings_error
+
+
+    /**
+     * @param string $filePath
+     * @return string
+     * Adapted from plugin-update-checker
+     */
+    public function get_file_url($filePath) {
+
+		$absolutePath = realpath(dirname(__FILE__) . '/' . ltrim($filePath, '/'));
+
+        //Where is the library located inside the WordPress directory structure?
+        $absolutePath = wp_normalize_path($absolutePath);
+        $pluginDir = wp_normalize_path(WP_PLUGIN_DIR);
+        $muPluginDir = wp_normalize_path(WPMU_PLUGIN_DIR);
+        $themeDir = wp_normalize_path(get_theme_root());
+
+        if ( (strpos($absolutePath, $pluginDir) === 0) || (strpos($absolutePath, $muPluginDir) === 0) ) {
+            //It's part of a plugin.
+            return plugins_url(basename($absolutePath), $absolutePath);
+        } else if ( strpos($absolutePath, $themeDir) === 0 ) {
+            //It's part of a theme.
+            $relativePath = substr($absolutePath, strlen($themeDir) + 1);
+            $template = substr($relativePath, 0, strpos($relativePath, '/'));
+            $baseUrl = get_theme_root_uri($template);
+
+            if ( !empty($baseUrl) && $relativePath ) {
+                return $baseUrl . '/' . $relativePath;
+            }
+        } 
+        return '';
+    } // end function get_updater_url
+
 }} // end class DustySun_WP_Settings_API

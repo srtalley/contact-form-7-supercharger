@@ -1,6 +1,7 @@
 
 <?php 
-$update_slug = $this->get_plugin_options()['plugin_slug'];
-use \DustySun\WP_License_Agent\Updater\v1_4 as WPLA;
-echo WPLA\License_Panel::show_license_panel($update_slug);
+$update_slug = $this->main_settings['item_slug'];
+use \DustySun\WP_License_Agent\Client\v1_5 as WPLA;
+$license_panel = new WPLA\License_Panel($update_slug);
+echo $license_panel->show_license_panel();
 ?>

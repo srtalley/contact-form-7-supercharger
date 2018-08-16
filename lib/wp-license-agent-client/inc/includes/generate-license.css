@@ -1,10 +1,10 @@
-/* v1.4.4 */
+/* v1.5 */
 
 .wpla-check-license-panel * {
     box-sizing: border-box;
 }
 .wpla-check-license-panel {
-    background-color: #F1F5F9;
+    background-color: #f3f3f3;
 }
 .wpla-check-license-response-wrapper {
     background-color: #535d67;
@@ -29,8 +29,8 @@ button.wpla-check-license {
     font-weight: bold;
     border: 2px solid #fff;
     margin-right: 1px;
+    cursor: pointer;
 }
-
 button.wpla-check-license:focus {
     outline: -webkit-focus-ring-color none;
     outline-color: -webkit-focus-ring-color;
@@ -54,6 +54,14 @@ button.wpla-check-license:focus {
 }
 .wpla-check-license-response-wrapper.valid button.wpla-check-license {
     color: #005019;
+}
+button.wpla-check-license:disabled,
+button.wpla-check-license:disabled:hover {
+    opacity: 0;
+    cursor: default;
+    /* background-color: rgba(0, 0, 0, 0) !important;
+    color: rgba(0, 0, 0, 0) !important; */
+    /* border: rgba(0, 0, 0, 0) !important; */
 }
 .wpla-check-license-response-wrapper .dashicons {
     width: 24px;
@@ -101,7 +109,7 @@ button.wpla-check-license:focus {
     border-radius: 0;
     border: none;
     box-shadow: none;
-    background: #E0E5EA;
+    background: #e2e2e2;
     padding: 13px;
     font-size: 14px;
     color: #32373C;
@@ -117,7 +125,7 @@ button.wpla-check-license:focus {
 }
 .wpla-check-license-panel input[type="text"]:focus,
 .wpla-check-license-panel input[type="email"]:focus {
-    background: #cbd3da;
+    background: #cecece;
 }
 .wpla-license-values-updated {
     display:none;
@@ -125,8 +133,15 @@ button.wpla-check-license:focus {
 .wpla-license-values-updated.visible {
     display: block;
     border-left: 5px solid green;
-    background: #dff9f2;
-    padding: 2px 30px;
+    padding: 8px 30px;
+    color: black;
+    margin-bottom: 15px;
+    box-shadow: 1px 1px 9px 1px rgba(0, 0, 0, 0.15);
+}
+.wpla-license-values-updated.visible h4 {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1.1em;
+    margin: 0;
 }
 /* Lightbox */
 .wpla-lightbox-modal {
@@ -212,6 +227,7 @@ button.wpla-check-license:focus {
     }
     .wpla-check-license-panel .wpla-row.wpla-email {
         padding-right: 10px;
+        padding-bottom: 0;
     }
 }
 @media (max-width: 525px) {

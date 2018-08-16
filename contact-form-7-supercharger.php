@@ -11,8 +11,8 @@ License: GPLv2
 */
 
 namespace DustySun\CF7_Supercharger;
-use \DustySun\WP_Settings_API\v1_2 as DSWPSettingsAPI;
-use \DustySun\WP_License_Agent\Updater\v1_4 as WPLA;
+use \DustySun\WP_Settings_API\v2 as DSWPSettingsAPI;
+use \DustySun\WP_License_Agent\Client\v1_5 as WPLA;
 
 //Include the admin panel page
 require_once( dirname( __FILE__ ) . '/lib/dustysun-wp-settings-api/ds_wp_settings_api.php');
@@ -34,14 +34,12 @@ class Enhanced_Contact_Form_7 {
   private $ds_ewpcf7_json_file;
   private $ds_ewpcf7_settings_obj;
   private $current_settings;
-  private $plugin_settings;
+  private $main_settings;
   private $redirectpage;
   private $utm;
 
   public function __construct() {
 
-    // set the default settings
-		register_activation_hook( __FILE__, array($this, 'ds_ewpcf7_default_settings' ));
     // construct tag generators
     $this->utm = new UTM_Module();
     $this->redirectpage = new RedirectPage_Module();
@@ -54,7 +52,7 @@ class Enhanced_Contact_Form_7 {
     $this->ds_ewpcf7_get_current_settings();
 
     // check if the license is valid
-    $ds_ewpcf7_plugin_slug = $this->plugin_settings['plugin_slug'];
+    $ds_ewpcf7_plugin_slug = $this->main_settings['item_slug'];
 
     $license_info = get_option($ds_ewpcf7_plugin_slug . '_daily_license_check', true);
 
@@ -85,7 +83,8 @@ class Enhanced_Contact_Form_7 {
       endif;
 
     } // end if($ds_ewpcf7_keep_processing)
-
+    // set the default settings
+		register_activation_hook( __FILE__, array($this, 'ds_ewpcf7_default_settings' ));
   } // end public function __construct
 
 public function ds_ewpcf7_get_current_settings(){
@@ -97,13 +96,16 @@ public function ds_ewpcf7_get_current_settings(){
 
     // get the settings
     $this->current_settings = $this->ds_ewpcf7_settings_obj->get_current_settings();
-    $this->plugin_settings = $this->ds_ewpcf7_settings_obj->get_plugin_options();
+    $this->main_settings = $this->ds_ewpcf7_settings_obj->get_main_settings();
   } // end function ds_ewpcf7_get_current_settings
 
   public function ds_ewpcf7_default_settings() {
-    $this->ds_ewpcf7_get_current_settings();
+    // Must be called after the settings_obj is set
+    if(!$this->ds_ewpcf7_settings_obj || $this->ds_ewpcf7_settings_obj == '') {
+      $this->ds_ewpcf7_get_current_settings();
+    } // end if
     $this->ds_ewpcf7_settings_obj->set_current_settings(true);
-    $this->ds_ewpcf7_settings_obj->set_plugin_options(true);
+    $this->ds_ewpcf7_settings_obj->set_main_settings(true);
   } // end function ds_ewpcf7_default_settings()
 
   public function ds_ewpcf7_register_styles_scripts() {
@@ -437,8 +439,8 @@ public function ds_ewpcf7_get_current_settings(){
   public function ds_ewpcf7_build_update_checker() {
     $this->ds_ewpcf7_get_current_settings();
     $settings = array(
-      'update_url' => $this->plugin_settings['wpla_update_url'],
-      'update_slug' => $this->plugin_settings['plugin_slug'],
+      'update_url' => $this->main_settings['wpla_update_url'],
+      'update_slug' => $this->main_settings['item_slug'],
       'main_file' => __FILE__,
       'news_widget' => true,
       'puc_errors' => false

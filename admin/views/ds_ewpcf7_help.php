@@ -1,7 +1,7 @@
 <?php
 //vars
-$ds_support_uri = $this->plugin_settings['support_uri'];
-$ds_support_email = $this->plugin_settings['support_email'];
+$ds_support_uri = $this->main_settings['support_uri'];
+$ds_support_email = $this->main_settings['support_email'];
 ?>
 
 <div>

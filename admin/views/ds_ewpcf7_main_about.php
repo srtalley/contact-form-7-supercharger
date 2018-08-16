@@ -1,14 +1,12 @@
 <?php
 
 //vars
-
-$ds_wc_crr_plugin_settings = $this->plugin_settings;
-$ds_version = $ds_wc_crr_plugin_settings['version'];
-$ds_author = $ds_wc_crr_plugin_settings['author'];
-$ds_author_uri = $ds_wc_crr_plugin_settings['author_uri'];
-$ds_plugin_name = $ds_wc_crr_plugin_settings['plugin_name'];
-$ds_plugin_uri = $ds_wc_crr_plugin_settings['plugin_uri'];
-$ds_plugin_email = $ds_wc_crr_plugin_settings['support_email'];
+$ds_version = $this->main_settings['version'];
+$ds_author = $this->main_settings['author'];
+$ds_author_uri = $this->main_settings['author_uri'];
+$ds_plugin_name = $this->main_settings['name'];
+$ds_plugin_uri = $this->main_settings['item_uri'];
+$ds_plugin_email = $this->main_settings['support_email'];
 
 ?>
 

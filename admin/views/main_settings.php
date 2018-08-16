@@ -45,7 +45,7 @@
             <li><strong>Redirect pages:</strong> Add a redirect page easily with the <strong>[redirectpage]</strong> tag. This uses fully supported methods in Contact Form 7 v5+.</li>
             </ul>
 
-            <p>Need detailed help? No problem! Check the <a href="?page=<?php echo $this->plugin_settings['page_slug'];?>&amp;tab=ds_ewpcf7_help">help tab</a> below for step-by-step instructions.</p>
+            <p>Need detailed help? No problem! Check the <a href="?page=<?php echo $this->main_settings['page_slug'];?>&amp;tab=ds_ewpcf7_help">help tab</a> below for step-by-step instructions.</p>
 
       </div>
 
