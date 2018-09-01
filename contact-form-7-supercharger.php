@@ -5,7 +5,7 @@ Description: Adds great features to Contact Form 7 such as iOS-style hover label
 Author: Dusty Sun
 Author URI: http://dustysun.com
 Plugin URI: https://dustysun.com/contact-form-7-supercharger/
-Version: 1.3.2
+Version: 1.4
 Text Domain: ds_ewpcf7
 License: GPLv2
 */
@@ -69,7 +69,7 @@ class Enhanced_Contact_Form_7 {
       add_filter('wpcf7_form_class_attr', array($this,'ds_ewpcf7_add_form_class' ));
 
       // check the form elements and add hover labels
-      add_filter('wpcf7_form_elements', array($this, 'ds_ewpcf7_modify_form_elements'));
+      add_filter('wpcf7_form_elements', array($this, 'ds_ewpcf7_modify_form_elements'), 9999);
 
       // modify the output response and add our lightbox
       if($this->current_settings['ds_ewpcf7_form_style_options']['lightbox_enabled'] == "yes"):
@@ -212,17 +212,24 @@ public function ds_ewpcf7_get_current_settings(){
         $ds_ewpcf7_output_inner_html_fragment->appendXML($ds_ewpcf7_output_inner_html);
         $ds_ewpcf7_output_wrapped_html->appendChild($ds_ewpcf7_output_inner_html_fragment);
 
-        // remove any html tags around the item
-        $trim_off_front = strpos($ds_ewpcf7_output_dom->saveHTML(),'<html>') + 6;
-        $trim_off_end = (strrpos($ds_ewpcf7_output_dom->saveHTML(),'</html>')) - strlen($ds_ewpcf7_output_dom->saveHTML());
-
         // modify the content and add our new lightbox
         $ds_ewpcf7_output_original_html_node->parentNode->parentNode->replaceChild($ds_ewpcf7_output_wrapped_html, $ds_ewpcf7_output_original_html_node->parentNode);
+
+
+
+        
 
       }// end if(strstr($tag->getAttribute('class'), 'wpcf7-response-output'))
     } // end foreach($ds_ewpcf7_output_original_html_nodes as $ds_ewpcf7_output_original_html_node)
 
-    $trimmed_result = substr($ds_ewpcf7_output_dom->saveHTML(), $trim_off_front, $trim_off_end);
+    // remove any html tags around the item
+    // $trim_off_front = strpos($ds_ewpcf7_output_dom->saveHTML(),'<html>') + 6;
+    // $trim_off_end = (strrpos($ds_ewpcf7_output_dom->saveHTML(),'</html>')) - strlen($ds_ewpcf7_output_dom->saveHTML());
+
+    // $trimmed_result = substr($ds_ewpcf7_output_dom->saveHTML(), $trim_off_front, $trim_off_end);
+
+    // new method to remove any html tags around the item
+    $trimmed_result = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $ds_ewpcf7_output_dom->saveHTML()));
 
     // return our modified HTML
     return $trimmed_result;
@@ -279,11 +286,11 @@ public function ds_ewpcf7_get_current_settings(){
         // see if there's a placeholder in the element. If not, skip.
         if($ds_ewpcf7_tag->getAttribute('placeholder') != '' && $ds_ewpcf7_tag->getAttribute('placeholder') != null) {
 
-          // get the literal HTML of the containing wrapper (span class)
           $ds_ewpcf7_input_html = $ds_ewpcf7_tag->parentNode->ownerDocument->saveXML($ds_ewpcf7_tag->parentNode);
+
           // wrap the html
           // create the div
-          $ds_ewpcf7_wrapped_html = $ds_ewpcf7_dom->createElement('div');
+          $ds_ewpcf7_wrapped_html = $ds_ewpcf7_dom->createElement('span');
           $ds_ewpcf7_wrapped_html_class = $ds_ewpcf7_dom->createAttribute('class');
           $ds_ewpcf7_wrapped_html_class->value = 'ds-hover-label ds-show-placeholder';
           $ds_ewpcf7_wrapped_html->appendChild($ds_ewpcf7_wrapped_html_class);
@@ -300,8 +307,6 @@ public function ds_ewpcf7_get_current_settings(){
           $ds_ewpcf7_input_html_fragment->appendXML($ds_ewpcf7_input_html);
           $ds_ewpcf7_wrapped_html->appendChild($ds_ewpcf7_input_html_fragment);
 
-
-          // replace our node with the now wrapped version
           $ds_ewpcf7_tag->parentNode->parentNode->replaceChild($ds_ewpcf7_wrapped_html, $ds_ewpcf7_tag->parentNode);
 
         } // if($ds_ewpcf7_tag->getAttribute('placeholder') != '' && $ds_ewpcf7_tag->getAttribute('placeholder') != null)
@@ -369,27 +374,31 @@ public function ds_ewpcf7_get_current_settings(){
 
       $utm_field_html = $utm_module->ds_utmz_create_hidden_fields();
 
-      // create a hidden field wrapper
-      $ds_ewpcf7_utm_wrapped_html = $ds_ewpcf7_dom->createElement('div');
-      $ds_ewpcf7_utm_wrapped_html_class = $ds_ewpcf7_dom->createAttribute('class');
-      $ds_ewpcf7_utm_wrapped_html_class->value = 'wpcf7-utm';
-      $ds_ewpcf7_utm_wrapped_html->appendChild($ds_ewpcf7_utm_wrapped_html_class);
-  		$ds_ewpcf7_utm_inner_html_fragment = $ds_ewpcf7_dom->createDocumentFragment();
-      $ds_ewpcf7_utm_inner_html_fragment->appendXML($utm_field_html);
-  		$ds_ewpcf7_utm_wrapped_html->appendChild($ds_ewpcf7_utm_inner_html_fragment);
+      // see if there is html we should add 
+      if($utm_field_html != '' && $utm_field_html != null) {
+        // create a hidden field wrapper
+        $ds_ewpcf7_utm_wrapped_html = $ds_ewpcf7_dom->createElement('div');
+        $ds_ewpcf7_utm_wrapped_html_class = $ds_ewpcf7_dom->createAttribute('class');
+        $ds_ewpcf7_utm_wrapped_html_class->value = 'wpcf7-utm';
+        $ds_ewpcf7_utm_wrapped_html->appendChild($ds_ewpcf7_utm_wrapped_html_class);
+        $ds_ewpcf7_utm_inner_html_fragment = $ds_ewpcf7_dom->createDocumentFragment();
+        $ds_ewpcf7_utm_inner_html_fragment->appendXML($utm_field_html);
+        $ds_ewpcf7_utm_wrapped_html->appendChild($ds_ewpcf7_utm_inner_html_fragment);
 
-      // append it to the form
-      $ds_ewpcf7_dom->appendChild($ds_ewpcf7_utm_wrapped_html);
+        // append it to the form
+        $ds_ewpcf7_dom->appendChild($ds_ewpcf7_utm_wrapped_html);
+
+      } // end if($utm_field_html != '' && $utm_field_html != null)
     endif;
 
-    $ds_ewpcf7_modified_content = $ds_ewpcf7_dom->saveHTML();
+    $ds_ewpcf7_modified_content = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $ds_ewpcf7_dom->saveHTML()));
 
     return $ds_ewpcf7_modified_content;
 
   } // end function ds_ewpcf7_modify_form_elements
 
   public function ds_ewpcf7_modify_mail($wpcf7_form){
-    $current_submission = WPCF7_Submission::get_instance();
+    $current_submission = \WPCF7_Submission::get_instance();
 
     if($current_submission){
 

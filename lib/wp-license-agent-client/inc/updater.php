@@ -2,7 +2,7 @@
 /*
  * WP License Agent Update Checker Plugin & Theme Updater
  *
- * Version 1.5.4
+ * Version 1.5.6
  *
  * https://dustysun.com
  *
@@ -13,7 +13,7 @@
  * 
  * Define these in wp-config.php for debugging or to set a different URL for updates
  * define( 'WP_LICENSE_AGENT_DEBUG', true );
- * defune( 'WP_LICENSE_AGENT_DEVELOPMENT_VERSIONS', true );
+ * define( 'WP_LICENSE_AGENT_DEVELOPMENT_VERSIONS', true );
  * define( 'WP_LICENSE_AGENT_TEST_URL' , 'https://your_alternate_url');
  */
 
@@ -151,7 +151,7 @@ class Licensing_Agent {
   public function update_checker_info_result($request) {
     if(isset($request->license_error)) {
       if($request->license_error) {
-        update_option($this->update_settings['update_slug'] . '_puc_error', $request->license_error);
+        update_option($this->update_settings['update_slug'] . '_puc_error', $request);
       }
     } else {
       //clear any db error
@@ -197,7 +197,7 @@ class Licensing_Agent {
   } // end function retrieve_license_info
 
   public function register_update_checker_scripts() {
-    wp_enqueue_script( 'wpla-updater-1_5', WPLA_Client_Factory::get_updater_url( '/classes/js/updater.js'), '', false, true );
+    wp_enqueue_script( 'wpla-updater-1_5', WPLA_Client_Factory::get_updater_url('/inc/js/updater.js'), '', false, true );
   } // end register_update_checker_scripts
 
   // Clear the puc error message for this plugin or theme
@@ -276,16 +276,32 @@ class Licensing_Agent {
   } // end function retrieve_product_license_info
 
   public function show_puc_admin_error() {
-    $error_message = get_option($this->update_settings['update_slug'] . '_puc_error', true);
+    $puc_error = get_option($this->update_settings['update_slug'] . '_puc_error', true);
 
-    if(!is_array($error_message) && $error_message != '' && $error_message != null && $error_message != '1' && $error_message != 1) {
-      printf( '<div class="notice-wpla notice notice-error is-dismissible" data-update-slug="' . $this->update_settings['update_slug'] . '" data-type="_puc_error"><p>' . $error_message . '</p></div>');
-    } //end if($error_message != '' || $error_message != null)
+    if(isset($puc_error->license_error)) {
+
+      $current_version = $this->get_product_version();
+
+      # show the error if the current version is lesser than what's available
+      if( $puc_error->version > $current_version ) {
+        $error_message = $puc_error->license_error;
+
+        if(!is_array($error_message) && $error_message != '' && $error_message != null && $error_message != '1' && $error_message != 1) {
+          printf( '<div class="notice-wpla notice notice-error is-dismissible" data-update-slug="' . $this->update_settings['update_slug'] . '" data-type="_puc_error"><p>' . $error_message . '</p></div>');
+        } //end if($error_message != '' || $error_message != null)
+      } // end if($puc_error['version'] > $current_version ) 
+    } // end if(isset($puc_error->license_error)) 
   } //end functionshow_puc_admin_error
 
   public function show_license_error_banner() {
     // check the license validity
 		$license_info = get_option($this->update_settings['update_slug'] . '_daily_license_check', true);
+
+    // get the license info if it's blank
+    if($license_info == '') {
+      $this->retrieve_product_license_info();
+      $license_info = get_option($this->update_settings['update_slug'] . '_daily_license_check', true);
+    } // end if ($license_info == '')
 
 		if( isset($license_info->valid ) && !$license_info->valid ) {
 			$license_message = isset($license_info->message) ? $license_info->message : 'Invalid license.';
@@ -311,9 +327,17 @@ class Licensing_Agent {
     } else if($this->product_type == 'theme' || $this->product_type == 'child-theme') { 
         $product_name = wp_get_theme($this->update_settings['update_slug'])['Name'];
     } // end if 
-    
     return $product_name;
   } // end function get_product_name 
+
+  private function get_product_version() {
+    if($this->product_type == 'plugin' || $this->product_type == 'mu-plugin') {
+        $product_version = get_plugin_data($this->update_settings['main_file'])['Version'];
+    } else if($this->product_type == 'theme' || $this->product_type == 'child-theme') { 
+        $product_version = wp_get_theme($this->update_settings['update_slug'])['Version'];
+    } // end if 
+    return $product_version;
+  } // end function get_product_version 
 
   // Admin notice
 	public function show_general_admin_notices($var) {

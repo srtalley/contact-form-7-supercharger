@@ -163,6 +163,7 @@ if(!class_exists('DustySun\CF7_Supercharger\UTM_Module'))  { class UTM_Module {
     foreach($utm_values as $utm_key => $utm_value) {
       $utm_hidden_fields .='<input type="hidden" name="' . $utm_key . '" value="' . $utm_value . '" />';
     } //end foreach($utm_values as $utm_key => $utm_value)
+
     return $utm_hidden_fields;
   } //end function public function ds_utmz_create_hidden_fields(
 
