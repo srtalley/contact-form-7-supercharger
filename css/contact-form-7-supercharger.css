@@ -60,7 +60,8 @@ form.wpcf7-form.ds-ewpcf7 {
 
 /* Submit button */
 .ewpcf7-submit {
-  padding: 10px 0;
+  padding: 0 0 10px;
+  display: block;
 }
 
 .ewpcf7-submit .et_pb_contact_submit {

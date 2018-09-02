@@ -3,7 +3,7 @@ Contributors: Dusty Sun, Steve Talley
 Tags: contact, form, contact form, lightbox, utm, utm tracking, hover labels, labels, ios labels, form style
 Requires at least: 4.6
 Tested up to: 4.9.8
-Stable tag: 1.4
+Stable tag: 1.4.1
 License: GPLv2
 
 Contact Form 7 SUPERCHARGER adds tons of great options to the Contact Form 7 plugin.
@@ -46,6 +46,9 @@ For help setting up and configuring this plugin please refer to our [user guide]
 To request help, simply submit a [help request](https://dustysun.com/wordpress-plugin-theme-support/) on our site.
 
 == Changelog ==
+= v1.4.1 2018-09-01 =
+* Corrected issue with extra space above the submit button.
+
 = v1.4 2018-08-30 =
 * Fixed issue with extra paragraph tags being added within the form.
 * Fixed issue with UTM tracking.

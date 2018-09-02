@@ -5,7 +5,7 @@ Description: Adds great features to Contact Form 7 such as iOS-style hover label
 Author: Dusty Sun
 Author URI: http://dustysun.com
 Plugin URI: https://dustysun.com/contact-form-7-supercharger/
-Version: 1.4
+Version: 1.4.1
 Text Domain: ds_ewpcf7
 License: GPLv2
 */
@@ -334,7 +334,7 @@ public function ds_ewpcf7_get_current_settings(){
 
       if ($ds_ewpcf7_modify_submit_button == 'button'){
         // create a div that wraps the button
-        $ds_ewpcf7_submit_wrapped_html = $ds_ewpcf7_dom->createElement('div');
+        $ds_ewpcf7_submit_wrapped_html = $ds_ewpcf7_dom->createElement('span');
         $ds_ewpcf7_submit_wrapped_html_class = $ds_ewpcf7_dom->createAttribute('class');
         $ds_ewpcf7_submit_wrapped_html_class->value = 'ewpcf7-submit';
         $ds_ewpcf7_submit_wrapped_html->appendChild($ds_ewpcf7_submit_wrapped_html_class);
