@@ -5,7 +5,7 @@ Description: Adds great features to Contact Form 7 such as iOS-style hover label
 Author: Dusty Sun
 Author URI: http://dustysun.com
 Plugin URI: https://dustysun.com/contact-form-7-supercharger/
-Version: 1.4.1
+Version: 1.4.2
 Text Domain: ds_ewpcf7
 License: GPLv2
 */

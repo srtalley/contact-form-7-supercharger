@@ -1,4 +1,4 @@
-/* 1.3 */
+/* 1.4.2 */
 
 /* hide placeholders when clicking in box */
 form.wpcf7-form.ds-ewpcf7 input:focus::-webkit-input-placeholder { color:transparent; }
@@ -12,6 +12,7 @@ form.wpcf7-form.ds-ewpcf7 {
 /* Hover labels*/
 .ds-hover-label {
   display: block;
+  line-height: 0; /* prevents spaces below elements when errors are shown */
   position: relative;
   z-index: 0; /* added for the select drop down */
 }
@@ -23,22 +24,21 @@ form.wpcf7-form.ds-ewpcf7 {
   top: 0;
   left: -999px;
   z-index: 999;
-  padding: 14px 20px;
-  color: #909090;
   cursor: text;
 }
 .ds-show-placeholder label {
   opacity: 0;
 }
 .ds-hover-label-focus label {
-  top: -60px;
+  top: -55px;
   left: 0;
-  padding: 10px 20px;
+  padding: 15px 20px;
   white-space: nowrap;
   color: #FFF;
   background-color: #000;
   border-radius: 3px;
   opacity: 1;
+  line-height: 1em;
 }
 .ds-hover-label-focus.ds-show-placeholder label {
   opacity: 1;

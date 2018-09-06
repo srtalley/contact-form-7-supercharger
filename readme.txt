@@ -46,6 +46,9 @@ For help setting up and configuring this plugin please refer to our [user guide]
 To request help, simply submit a [help request](https://dustysun.com/wordpress-plugin-theme-support/) on our site.
 
 == Changelog ==
+= v1.4.2 2018-09-02 =
+* Fixed issue with spacing of error messages.
+
 = v1.4.1 2018-09-01 =
 * Corrected issue with extra space above the submit button.
 
