@@ -1,6 +1,6 @@
 <?php
 // GitHub: https://github.com/srtalley/dustysun-wp-settings-api
-// Version 2.0
+// Version 2.0.1
 // Author: Steve Talley
 // Organization: Dusty Sun
 // Author URL: https://dustysun.com/
@@ -380,14 +380,22 @@ if(!class_exists('DustySun\WP_Settings_API\v2\SettingsBuilder'))  { class Settin
 						
 						if($this->ds_wp_settings_option_fields) {						
 							foreach($this->ds_wp_settings_option_fields as $option_key => $option_array) {
-								$option_array['type'] = 'option';
-								$ds_wp_settings_api_tab_array[$option_key] = $option_array;
+								if(isset($option_array['skip']) && ($option_array['skip'] == 'true' || $option_array['skip'] === true)) {
+									continue;
+								} else {
+									$option_array['type'] = 'option';
+									$ds_wp_settings_api_tab_array[$option_key] = $option_array;
+								} // end if skip
 							} // end foreach 
 						} // end if
 						if($this->ds_wp_settings_api_about_sections) {
 							foreach($this->ds_wp_settings_api_about_sections as $about_section_key => $about_section_array) {
-								$about_section_array['type'] = 'about_section';
-								$ds_wp_settings_api_tab_array[$about_section_key] = $about_section_array;
+								if(isset($about_section_array['skip']) && ($about_section_array['skip'] == 'true' || $about_section_array['skip'] === true)) {
+									continue;
+								} else {
+									$about_section_array['type'] = 'about_section';
+									$ds_wp_settings_api_tab_array[$about_section_key] = $about_section_array;
+								} // end if skip
 							} // end foreach 
 						} // end if
 
@@ -408,7 +416,7 @@ if(!class_exists('DustySun\WP_Settings_API\v2\SettingsBuilder'))  { class Settin
 								$tab_label = 'Option ' . $ds_wp_settings_api_section_loop_counter;
 							}
 							?>
-							<a href="<?php menu_page_url($this->main_settings['page_slug']);?>&tab=<?php echo $ds_wp_settings_api_section_slug; ?>" class="nav-tab <?php if($active_tab == $ds_wp_settings_api_section_slug){echo 'nav-tab-active';} ?> "><?php _e($tab_label, 'sandbox'); ?></a>
+							<a href="<?php menu_page_url($this->main_settings['page_slug']);?>&tab=<?php echo $ds_wp_settings_api_section_slug; ?>" class="nav-tab <?php if($active_tab == $ds_wp_settings_api_section_slug){echo 'nav-tab-active';} ?> "><?php _e($tab_label, $this->main_settings['text_domain']); ?></a>
 
 							<?php
 							$ds_wp_settings_api_section_loop_counter++;
